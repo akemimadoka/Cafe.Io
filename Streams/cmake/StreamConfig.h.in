@@ -1,0 +1,3 @@
+#pragma once
+
+#cmakedefine01 CAFE_IO_STREAMS_INCLUDE_FILE_STREAM
