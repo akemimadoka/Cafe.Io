@@ -92,19 +92,40 @@ namespace Cafe::Io
 			{
 			}
 
+			FileStreamCommonPart(FileStreamCommonPart const&) = delete;
+
+			FileStreamCommonPart(FileStreamCommonPart&& other) noexcept
+			    : m_FileHandle{ std::exchange(other.m_FileHandle, InvalidHandleValue) }
+			{
+			}
+
 			~FileStreamCommonPart()
 			{
 				// 析构函数中不会动态绑定，所以加上限定符
 				FileStreamCommonPart::Close();
 			}
 
+			FileStreamCommonPart& operator=(FileStreamCommonPart const&) = delete;
+
+			FileStreamCommonPart& operator=(FileStreamCommonPart&& other) noexcept
+			{
+				Close();
+				m_FileHandle = std::exchange(other.m_FileHandle, InvalidHandleValue);
+
+				return *this;
+			}
+
 			void Close() override
 			{
+				if (m_FileHandle != InvalidHandleValue)
+				{
 #	if defined(_WIN32)
-				CloseHandle(m_FileHandle);
+					CloseHandle(m_FileHandle);
 #	else
-				close(m_FileHandle);
+					close(m_FileHandle);
 #	endif
+					m_FileHandle = InvalidHandleValue;
+				}
 			}
 
 			NativeHandle GetNativeHandle() const noexcept

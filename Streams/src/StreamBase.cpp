@@ -11,6 +11,10 @@ Stream::~Stream()
 {
 }
 
+void Stream::Close()
+{
+}
+
 InputStream::~InputStream()
 {
 }
@@ -50,7 +54,7 @@ std::size_t InputStream::Skip(std::size_t n)
 {
 	auto remainedBytes = n;
 	std::byte buffer[DefaultSkipBufferSize];
-	while (n)
+	while (remainedBytes)
 	{
 		const auto readBytes =
 		    ReadBytes(gsl::make_span(buffer, std::min(sizeof buffer, remainedBytes)));
@@ -76,4 +80,34 @@ void OutputStream::Flush()
 
 InputOutputStream::~InputOutputStream()
 {
+}
+
+SeekableStreamBase::~SeekableStreamBase()
+{
+}
+
+void SeekableStreamBase::SeekFromBegin(std::size_t pos)
+{
+	if (pos <= static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()))
+	{
+		Seek(SeekOrigin::Begin, static_cast<std::ptrdiff_t>(pos));
+	}
+	else
+	{
+		Seek(SeekOrigin::Begin, std::numeric_limits<std::ptrdiff_t>::max());
+		Seek(SeekOrigin::Current,
+		     static_cast<std::ptrdiff_t>(pos - std::numeric_limits<std::ptrdiff_t>::max()));
+	}
+}
+
+std::size_t SeekableStreamBase::GetTotalSize()
+{
+	const auto curPos = GetPosition();
+	CAFE_SCOPE_EXIT
+	{
+		SeekFromBegin(curPos);
+	};
+
+	Seek(SeekOrigin::End, 0);
+	return GetPosition();
 }
