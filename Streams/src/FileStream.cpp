@@ -104,21 +104,44 @@ std::size_t FileInputStream::Skip(std::size_t n)
 	return n;
 }
 
-FileOutputStream::FileOutputStream(std::filesystem::path const& path)
-    : FileOutputStream{ PathToNativeString(path) }
+FileOutputStream::FileOutputStream(std::filesystem::path const& path, FileOpenMode openMode)
+    : FileOutputStream{ PathToNativeString(path), openMode }
 {
 }
 
-FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> const& path)
+FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> const& path,
+                                   FileOpenMode openMode)
 {
 	Encoding::String<PathNativeCodePage> pathStr;
 	const auto pathStrValue = path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData();
 
 #if defined(_WIN32)
-	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_WRITE, 0,
-	                           nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_WRITE, 0, nullptr,
+	                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+	switch (openMode)
+	{
+	default:
+		assert(!"Invalid openMode.");
+		[[fallthrough]];
+	case FileOpenMode::Truncate:
+		// 分离 Truncate 实现是因为 TRUNCATE_EXISTING 在文件不存在时报错
+		SetEndOfFile(m_FileHandle);
+		break;
+	case FileOpenMode::Append:
+		FileOutputStream::Seek(SeekOrigin::End, 0);
+		break;
+	case FileOpenMode::Overwrite:
+		break;
+	}
 #else
-	m_FileHandle = open(pathStrValue, O_WRONLY);
+	m_FileHandle = open(pathStrValue, openMode == FileOpenMode::Append ? O_APPEND : O_WRONLY);
+
+	if (openMode == FileOpenMode::Truncate)
+	{
+		// 分离 Truncate 实现是因为 O_TRUNC 未说明文件不存在时的行为，因此自己实现
+		ftruncate64(m_FileHandle, 0);
+	}
 #endif
 
 	if (m_FileHandle == InvalidHandleValue)

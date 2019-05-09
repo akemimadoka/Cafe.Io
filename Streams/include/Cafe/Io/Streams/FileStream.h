@@ -217,12 +217,22 @@ namespace Cafe::Io
 	class CAFE_PUBLIC FileOutputStream : public Detail::FileStreamCommonPart<OutputStream>
 	{
 	public:
-		explicit FileOutputStream(std::filesystem::path const& path);
-		explicit FileOutputStream(Encoding::StringView<PathNativeCodePage> const& path);
+		enum class FileOpenMode
+		{
+			Truncate,
+			Overwrite,
+			Append
+		};
+
+		explicit FileOutputStream(std::filesystem::path const& path,
+		                          FileOpenMode openMode = FileOpenMode::Truncate);
+		explicit FileOutputStream(Encoding::StringView<PathNativeCodePage> const& path,
+		                          FileOpenMode openMode = FileOpenMode::Truncate);
 
 		template <Encoding::CodePage::CodePageType CodePageValue>
-		explicit FileOutputStream(Encoding::StringView<CodePageValue> const& path)
-		    : FileOutputStream{ TextUtils::EncodeTo<PathNativeCodePage>(path).GetView() }
+		explicit FileOutputStream(Encoding::StringView<CodePageValue> const& path,
+		                          FileOpenMode openMode = FileOpenMode::Truncate)
+		    : FileOutputStream{ TextUtils::EncodeTo<PathNativeCodePage>(path).GetView(), openMode }
 		{
 		}
 
