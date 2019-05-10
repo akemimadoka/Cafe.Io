@@ -301,6 +301,7 @@ std::size_t BufferedOutputStream::WriteBytes(gsl::span<const std::byte> const& b
 	const auto writeSizeToBuffer =
 	    std::min(m_BufferSize - m_CurrentPosition, static_cast<std::size_t>(buffer.size()));
 	std::memcpy(&m_Buffer[m_CurrentPosition], buffer.data(), writeSizeToBuffer);
+	m_CurrentPosition += writeSizeToBuffer;
 	auto writtenSize = writeSizeToBuffer;
 	if (writeSizeToBuffer != buffer.size())
 	{

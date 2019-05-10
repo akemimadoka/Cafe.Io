@@ -1,13 +1,16 @@
 set(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM ON CACHE BOOL "Include FileStream in Cafe.Io.Streams")
+set(CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING ON CACHE BOOL "Enable file mapping in FileStreams")
 
 configure_file(cmake/StreamConfig.h.in Cafe/Io/Streams/Config/StreamConfig.h)
 
 set(SOURCE_FILES
     src/BufferedStream.cpp
+    src/MemoryStream.cpp
     src/StreamBase.cpp)
 
 set(HEADERS
     include/Cafe/Io/Streams/BufferedStream.h
+    include/Cafe/Io/Streams/MemoryStream.h
     include/Cafe/Io/Streams/StreamBase.h)
 
 if(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM)

@@ -5,6 +5,7 @@
 #if CAFE_IO_STREAMS_INCLUDE_FILE_STREAM
 
 #	include "StreamBase.h"
+#	include "MemoryStream.h"
 #	include <Cafe/Encoding/Strings.h>
 #	include <Cafe/TextUtils/Misc.h>
 #	include <filesystem>
@@ -14,10 +15,16 @@
 #		include <Cafe/Encoding/CodePage/UTF-16.h>
 #		include <fileapi.h>
 #		include <handleapi.h>
+#		include <memoryapi.h>
+#		include <windef.h>
+#		include <winbase.h>
 #	elif defined(__linux__)
 #		include <Cafe/Encoding/CodePage/UTF-8.h>
 #		include <fcntl.h>
 #		include <unistd.h>
+#		if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#			include <sys/mman.h>
+#		endif
 #	endif
 
 namespace Cafe::Io
@@ -70,6 +77,10 @@ namespace Cafe::Io
 		template <typename BaseStream>
 		struct FileStreamCommonPart : SeekableStream<BaseStream>
 		{
+		private:
+			static constexpr bool IsInputStream = std::is_same_v<BaseStream, InputStream>;
+
+		public:
 			using NativeHandle =
 #	if defined(_WIN32)
 			    HANDLE
@@ -88,7 +99,21 @@ namespace Cafe::Io
 			    ;
 
 			explicit FileStreamCommonPart(NativeHandle nativeHandle = InvalidHandleValue) noexcept
-			    : m_FileHandle{ nativeHandle }
+			    : m_FileHandle
+			{
+				nativeHandle
+			}
+#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#		if defined(_WIN32)
+			, m_FileMapping{}, m_MappedFile
+			{
+			}
+#		else
+			, m_FileView{}, m_FileViewSize
+			{
+			}
+#		endif
+#	endif
 			{
 			}
 
@@ -117,6 +142,9 @@ namespace Cafe::Io
 
 			void Close() override
 			{
+#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+				Unmap();
+#	endif
 				if (m_FileHandle != InvalidHandleValue)
 				{
 #	if defined(_WIN32)
@@ -186,6 +214,114 @@ namespace Cafe::Io
 
 				return static_cast<std::size_t>(size.QuadPart);
 			}
+#	endif
+
+#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+			std::conditional_t<IsInputStream, ExternalMemoryInputStream, ExternalMemoryOutputStream>
+			MapToMemory(std::size_t begin = 0, std::size_t size = 0, bool executable = false)
+			{
+				using MapStream = std::conditional_t<IsInputStream, ExternalMemoryInputStream,
+				                                     ExternalMemoryOutputStream>;
+#		if defined(_WIN32)
+#			if defined(_WIN64)
+				const DWORD sizeLowPart = size & 0xFFFFFFFF;
+				const DWORD sizeHighPart = (size >> 32) & 0xFFFFFFFF;
+#			else
+				const DWORD sizeLowPart = size;
+				const DWORD sizeHighPart = 0;
+#			endif
+				const auto fileMapping = CreateFileMappingA(
+				    m_FileHandle, nullptr,
+				    IsInputStream ? (executable ? PAGE_EXECUTE_READ : PAGE_READONLY)
+				                  : (executable ? PAGE_EXECUTE_READWRITE : PAGE_READWRITE),
+				    sizeHighPart, sizeLowPart, nullptr);
+				if (!fileMapping)
+				{
+					CAFE_THROW(FileIoException, CAFE_UTF8_SV("CreateFileMappingA failed."));
+				}
+
+				CAFE_SCOPE_FAIL
+				{
+					CloseHandle(fileMapping);
+				};
+
+#			if defined(_WIN64)
+				const DWORD beginLowPart = begin & 0xFFFFFFFF;
+				const DWORD beginHighPart = (begin >> 32) & 0xFFFFFFFF;
+#			else
+				const DWORD beginLowPart = begin;
+				const DWORD beginHighPart = 0;
+#			endif
+
+				const auto mappedAddress = MapViewOfFile(fileMapping,
+				                                         (IsInputStream ? FILE_MAP_READ : FILE_MAP_WRITE) |
+				                                             (executable ? FILE_MAP_EXECUTE : 0),
+				                                         beginHighPart, beginLowPart, size);
+
+				if (!mappedAddress)
+				{
+					CAFE_THROW(FileIoException, CAFE_UTF8_SV("MapViewOfFile failed."));
+				}
+
+				m_FileMapping = fileMapping;
+				m_MappedFile = mappedAddress;
+
+				return MapStream{ gsl::make_span(
+					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
+					      mappedAddress),
+					  size ? size : GetTotalSize()) };
+#		else
+				const auto mappedSize = size ? size : GetTotalSize();
+				const auto mappedFile =
+				    mmap64(nullptr, mappedSize,
+				           PROT_READ | (IsInputStream ? 0 : PROT_WRITE) | (executable ? PROT_EXEC : 0),
+				           MAP_SHARED, m_FileHandle, begin);
+				if (mappedFile == MAP_FAILED)
+				{
+					CAFE_THROW(FileIoException, CAFE_UTF8_SV("mmap64 failed."));
+				}
+
+				m_FileView = mappedFile;
+				m_FileViewSize = mappedSize;
+
+				return MapStream{ gsl::make_span(
+					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(mappedFile),
+					  mappedSize) };
+#		endif
+			}
+
+			void Unmap() noexcept
+			{
+#		if defined(_WIN32)
+				assert(!m_MappedFile == !m_FileMapping);
+				if (m_MappedFile)
+				{
+					UnmapViewOfFile(m_MappedFile);
+					CloseHandle(m_FileMapping);
+
+					m_FileMapping = nullptr;
+					m_MappedFile = nullptr;
+				}
+#		else
+				assert(!m_FileView == !m_FileViewSize);
+				if (m_FileView)
+				{
+					munmap(m_FileView, m_FileViewSize);
+
+					m_FileView = nullptr;
+					m_FileViewSize = 0;
+				}
+#		endif
+			}
+
+		private:
+#		if defined(_WIN32)
+			HANDLE m_FileMapping;
+			void* m_MappedFile;
+#		else
+			void* m_FileView;
+			std::size_t m_FileViewSize;
+#		endif
 #	endif
 
 		protected:

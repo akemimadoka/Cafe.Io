@@ -116,8 +116,8 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
 	const auto pathStrValue = path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData();
 
 #if defined(_WIN32)
-	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_WRITE, 0, nullptr,
-	                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ | GENERIC_WRITE,
+	                           0, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	switch (openMode)
 	{
