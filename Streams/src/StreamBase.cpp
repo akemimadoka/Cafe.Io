@@ -111,3 +111,7 @@ std::size_t SeekableStreamBase::GetTotalSize()
 	Seek(SeekOrigin::End, 0);
 	return GetPosition();
 }
+
+template class SeekableStream<InputStream>;
+template class SeekableStream<OutputStream>;
+template class SeekableStream<InputOutputStream>;

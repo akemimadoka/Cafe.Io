@@ -99,9 +99,9 @@ namespace Cafe::Io
 			    ;
 
 			explicit FileStreamCommonPart(NativeHandle nativeHandle = InvalidHandleValue) noexcept
-			    : m_FileHandle
+			    : m_FileHandle{ nativeHandle }, m_ShouldNotDestroy
 			{
-				nativeHandle
+				false
 			}
 #	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
 #		if defined(_WIN32)
@@ -120,7 +120,24 @@ namespace Cafe::Io
 			FileStreamCommonPart(FileStreamCommonPart const&) = delete;
 
 			FileStreamCommonPart(FileStreamCommonPart&& other) noexcept
-			    : m_FileHandle{ std::exchange(other.m_FileHandle, InvalidHandleValue) }
+			    : m_FileHandle{ std::exchange(other.m_FileHandle, InvalidHandleValue) },
+			      m_ShouldNotDestroy
+			{
+				other.m_ShouldNotDestroy
+			}
+#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#		if defined(_WIN32)
+			, m_FileMapping{ std::exchange(other.m_FileMapping, nullptr) }, m_MappedFile
+			{
+				std::exchange(other.m_MappedFile, nullptr)
+			}
+#		else
+			, m_FileView{ std::exchange(other.m_FileView, nullptr) }, m_FileViewSize
+			{
+				std::exchange(other.m_FileViewSize, 0)
+			}
+#		endif
+#	endif
 			{
 			}
 
@@ -134,8 +151,21 @@ namespace Cafe::Io
 
 			FileStreamCommonPart& operator=(FileStreamCommonPart&& other) noexcept
 			{
-				Close();
-				m_FileHandle = std::exchange(other.m_FileHandle, InvalidHandleValue);
+				if (this != &other)
+				{
+					Close();
+					m_FileHandle = std::exchange(other.m_FileHandle, InvalidHandleValue);
+					m_ShouldNotDestroy = other.m_ShouldNotDestroy;
+#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#		if defined(_WIN32)
+					m_FileMapping = std::exchange(other.m_FileMapping, nullptr);
+					m_MappedFile = std::exchange(other.m_MappedFile, nullptr);
+#		else
+					m_FileView = std::exchange(other.m_FileView, nullptr);
+					m_FileViewSize = std::exchange(other.m_FileViewSize, 0);
+#		endif
+#	endif
+				}
 
 				return *this;
 			}
@@ -145,7 +175,7 @@ namespace Cafe::Io
 #	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
 				Unmap();
 #	endif
-				if (m_FileHandle != InvalidHandleValue)
+				if (!m_ShouldNotDestroy && m_FileHandle != InvalidHandleValue)
 				{
 #	if defined(_WIN32)
 					CloseHandle(m_FileHandle);
@@ -314,6 +344,10 @@ namespace Cafe::Io
 #		endif
 			}
 
+		protected:
+			NativeHandle m_FileHandle;
+			bool m_ShouldNotDestroy;
+
 		private:
 #		if defined(_WIN32)
 			HANDLE m_FileMapping;
@@ -323,11 +357,15 @@ namespace Cafe::Io
 			std::size_t m_FileViewSize;
 #		endif
 #	endif
-
-		protected:
-			NativeHandle m_FileHandle;
+		};
+		
+		struct SpecifyNativeHandleTag
+		{
+			constexpr SpecifyNativeHandleTag() noexcept = default;
 		};
 	} // namespace Detail
+
+	constexpr Detail::SpecifyNativeHandleTag SpecifyNativeHandle{};
 
 	class CAFE_PUBLIC FileInputStream : public Detail::FileStreamCommonPart<InputStream>
 	{
@@ -341,13 +379,26 @@ namespace Cafe::Io
 		{
 		}
 
+		/// @brief  直接以已获得的文件句柄构造
+		/// @param  fileHandle      文件句柄
+		/// @param  transferOwner   转移所有权，若为 true 则 Close() 会关闭此句柄
+		explicit FileInputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle, bool transferOwner = true);
+
+		FileInputStream(FileInputStream const&) = delete;
+		FileInputStream(FileInputStream&&) = default;
+
 		~FileInputStream();
+
+		FileInputStream& operator=(FileInputStream const&) = delete;
+		FileInputStream& operator=(FileInputStream&&) = default;
 
 		std::size_t GetAvailableBytes() override;
 		std::optional<std::byte> ReadByte() override;
 		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
 
 		std::size_t Skip(std::size_t n) override;
+
+		static FileInputStream CreateStdInStream();
 	};
 
 	class CAFE_PUBLIC FileOutputStream : public Detail::FileStreamCommonPart<OutputStream>
@@ -372,11 +423,25 @@ namespace Cafe::Io
 		{
 		}
 
+		/// @brief  直接以已获得的文件句柄构造
+		/// @param  fileHandle      文件句柄
+		/// @param  transferOwner   转移所有权，若为 true 则 Close() 会关闭此句柄
+		explicit FileOutputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle, bool transferOwner = true);
+
+		FileOutputStream(FileOutputStream const&) = delete;
+		FileOutputStream(FileOutputStream&&) = default;
+
 		~FileOutputStream();
+
+		FileOutputStream& operator=(FileOutputStream const&) = delete;
+		FileOutputStream& operator=(FileOutputStream&&) = default;
 
 		bool WriteByte(std::byte value) override;
 		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
 		void Flush() override;
+
+		static FileOutputStream CreateStdOutStream();
+		static FileOutputStream CreateStdErrStream();
 	};
 } // namespace Cafe::Io
 

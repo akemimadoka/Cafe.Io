@@ -8,7 +8,7 @@ namespace Cafe::Io
 	/// @brief  缓存输入流
 	/// @remark 用于频繁小长度的读取时降低 IO 压力
 	///         本类不会取得包装流的所有权，在本类管理期间不应在外部操作包装流，否则可能导致错误
-	class CAFE_PUBLIC BufferedInputStream : SeekableStream<InputStream>
+	class CAFE_PUBLIC BufferedInputStream : public SeekableStream<InputStream>
 	{
 	public:
 		static constexpr std::size_t DefaultBufferSize = 1024;
@@ -64,7 +64,7 @@ namespace Cafe::Io
 	/// @brief  缓存输出流
 	/// @remark 用于频繁小长度的写入时降低 IO 压力
 	///         本类不会取得包装流的所有权，在本类管理期间不应在外部操作包装流，否则可能导致错误
-	class CAFE_PUBLIC BufferedOutputStream : OutputStream
+	class CAFE_PUBLIC BufferedOutputStream : public OutputStream
 	{
 	public:
 		static constexpr std::size_t DefaultBufferSize = 1024;

@@ -26,6 +26,17 @@ FileInputStream::FileInputStream(Encoding::StringView<PathNativeCodePage> const&
 	}
 }
 
+FileInputStream::FileInputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle,
+                                 bool transferOwner)
+    : FileStreamCommonPart{ fileHandle }
+{
+	m_ShouldNotDestroy = !transferOwner;
+	if (m_FileHandle == InvalidHandleValue || !fileHandle)
+	{
+		CAFE_THROW(FileIoException, CAFE_UTF8_SV("Invalid fileHandle."));
+	}
+}
+
 FileInputStream::~FileInputStream()
 {
 }
@@ -104,6 +115,15 @@ std::size_t FileInputStream::Skip(std::size_t n)
 	return n;
 }
 
+FileInputStream FileInputStream::CreateStdInStream()
+{
+#ifdef _WIN32
+	return FileInputStream{ SpecifyNativeHandle, GetStdHandle(STD_INPUT_HANDLE), false };
+#else
+	return FileInputStream{ SpecifyNativeHandle, STDIN_FILENO, false };
+#endif
+}
+
 FileOutputStream::FileOutputStream(std::filesystem::path const& path, FileOpenMode openMode)
     : FileOutputStream{ PathToNativeString(path), openMode }
 {
@@ -147,6 +167,17 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
 	if (m_FileHandle == InvalidHandleValue)
 	{
 		CAFE_THROW(FileIoException, CAFE_UTF8_SV("Open file failed."));
+	}
+}
+
+FileOutputStream::FileOutputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle,
+                                   bool transferOwner)
+    : FileStreamCommonPart{ fileHandle }
+{
+	m_ShouldNotDestroy = !transferOwner;
+	if (m_FileHandle == InvalidHandleValue || !fileHandle)
+	{
+		CAFE_THROW(FileIoException, CAFE_UTF8_SV("Invalid fileHandle."));
 	}
 }
 
@@ -204,5 +235,23 @@ void FileOutputStream::Flush()
 	FlushFileBuffers(m_FileHandle);
 #else
 	fsync(m_FileHandle);
+#endif
+}
+
+FileOutputStream FileOutputStream::CreateStdOutStream()
+{
+#ifdef _WIN32
+	return FileOutputStream{ SpecifyNativeHandle, GetStdHandle(STD_OUTPUT_HANDLE), false };
+#else
+	return FileOutputStream{ SpecifyNativeHandle, STDOUT_FILENO, false };
+#endif
+}
+
+FileOutputStream FileOutputStream::CreateStdErrStream()
+{
+#ifdef _WIN32
+	return FileOutputStream{ SpecifyNativeHandle, GetStdHandle(STD_ERROR_HANDLE), false };
+#else
+	return FileOutputStream{ SpecifyNativeHandle, STDERR_FILENO, false };
 #endif
 }

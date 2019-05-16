@@ -6,11 +6,13 @@ configure_file(cmake/StreamConfig.h.in Cafe/Io/Streams/Config/StreamConfig.h)
 set(SOURCE_FILES
     src/BufferedStream.cpp
     src/MemoryStream.cpp
+    src/StlStream.cpp
     src/StreamBase.cpp)
 
 set(HEADERS
     include/Cafe/Io/Streams/BufferedStream.h
     include/Cafe/Io/Streams/MemoryStream.h
+    include/Cafe/Io/Streams/StlStream.h
     include/Cafe/Io/Streams/StreamBase.h)
 
 if(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM)

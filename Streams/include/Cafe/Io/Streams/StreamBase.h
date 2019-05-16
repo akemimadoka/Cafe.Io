@@ -106,4 +106,8 @@ namespace Cafe::Io
 
 		virtual ~SeekableStream() = default;
 	};
+
+	extern template class SeekableStream<InputStream>;
+	extern template class SeekableStream<OutputStream>;
+	extern template class SeekableStream<InputOutputStream>;
 } // namespace Cafe::Io
