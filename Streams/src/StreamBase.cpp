@@ -19,23 +19,15 @@ InputStream::~InputStream()
 {
 }
 
-std::size_t InputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::optional<std::byte> InputStream::ReadByte()
 {
-	const auto readSize = static_cast<std::size_t>(buffer.size());
-	for (std::size_t i = 0; i < readSize; ++i)
+	std::byte value;
+	if (!ReadBytes(gsl::make_span(&value, 1)))
 	{
-		const auto readByte = ReadByte();
-		if (readByte.has_value())
-		{
-			buffer[i] = readByte.value();
-		}
-		else
-		{
-			return i;
-		}
+		return {};
 	}
 
-	return readSize;
+	return value;
 }
 
 std::size_t InputStream::ReadAvailableBytes(gsl::span<std::byte> const& buffer)
@@ -72,6 +64,11 @@ std::size_t InputStream::Skip(std::size_t n)
 
 OutputStream::~OutputStream()
 {
+}
+
+bool OutputStream::WriteByte(std::byte value)
+{
+	return WriteBytes(gsl::make_span(&value, 1));
 }
 
 void OutputStream::Flush()

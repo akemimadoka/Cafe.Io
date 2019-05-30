@@ -46,18 +46,6 @@ std::size_t FileInputStream::GetAvailableBytes()
 	return GetTotalSize() - GetPosition();
 }
 
-std::optional<std::byte> FileInputStream::ReadByte()
-{
-	std::byte buffer[1];
-	const auto readBytes = ReadBytes(gsl::make_span(buffer));
-	if (readBytes)
-	{
-		return { buffer[0] };
-	}
-
-	return {};
-}
-
 std::size_t FileInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	if (buffer.empty())
@@ -183,11 +171,6 @@ FileOutputStream::FileOutputStream(Detail::SpecifyNativeHandleTag, NativeHandle 
 
 FileOutputStream::~FileOutputStream()
 {
-}
-
-bool FileOutputStream::WriteByte(std::byte value)
-{
-	return WriteBytes(gsl::make_span(&value, 1));
 }
 
 std::size_t FileOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)

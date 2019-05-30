@@ -33,12 +33,12 @@ namespace Cafe::Io
 		virtual std::size_t GetAvailableBytes() = 0;
 
 		/// @brief  从流中读取一个字节
-		virtual std::optional<std::byte> ReadByte() = 0;
+		virtual std::optional<std::byte> ReadByte();
 
 		/// @brief  从流中读取多个字节，读取的个数为 buffer 的大小
 		/// @remark 若读取长度大于可用字节数，则阻塞到读取到足够字节数再返回
 		/// @return 读取的长度，若为 0 则表示流已到结尾或 buffer 大小为 0，其他异常情况将会抛出
-		virtual std::size_t ReadBytes(gsl::span<std::byte> const& buffer);
+		virtual std::size_t ReadBytes(gsl::span<std::byte> const& buffer) = 0;
 
 		/// @brief  从流中读取有效字节，读取的个数最多不超过 buffer 的大小
 		/// @remark 本方法不会阻塞，若有效字节数不足够填充整个 buffer 则只会填充已有的部分
@@ -56,7 +56,7 @@ namespace Cafe::Io
 		virtual ~OutputStream();
 
 		/// @brief  写入一个字节到流内
-		virtual bool WriteByte(std::byte value) = 0;
+		virtual bool WriteByte(std::byte value);
 
 		/// @brief  写入多个字节到流内，buffer 内全部数据都将写出，并阻塞到写入完成为止
 		/// @return 写入的字节数，仅供参考，对于特殊的流可能无意义或有其他特殊含义
@@ -98,7 +98,7 @@ namespace Cafe::Io
 	};
 
 	/// @brief  可寻位流
-	/// @tparam 基类流，为了减少菱形继承使用模板
+	/// @tparam BaseStream  基类流，为了减少菱形继承使用模板
 	template <typename BaseStream>
 	struct SeekableStream : BaseStream, SeekableStreamBase
 	{

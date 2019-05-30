@@ -15,7 +15,6 @@ namespace Cafe::Io
 		void Close() override;
 
 		std::size_t GetAvailableBytes() override;
-		std::optional<std::byte> ReadByte() override;
 		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
@@ -24,7 +23,6 @@ namespace Cafe::Io
 		void Seek(SeekOrigin origin, std::ptrdiff_t diff) override;
 		std::size_t GetTotalSize() override;
 
-		bool WriteByte(std::byte value) override;
 		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
 
 		gsl::span<std::byte> GetInternalStorage() noexcept;
@@ -107,7 +105,6 @@ namespace Cafe::Io
 		~ExternalMemoryInputStream();
 
 		std::size_t GetAvailableBytes() override;
-		std::optional<std::byte> ReadByte() override;
 		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 	};
@@ -119,7 +116,6 @@ namespace Cafe::Io
 		explicit ExternalMemoryOutputStream(gsl::span<std::byte> const& storage) noexcept;
 		~ExternalMemoryOutputStream();
 
-		bool WriteByte(std::byte value) override;
 		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
 	};
 } // namespace Cafe::Io

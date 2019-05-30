@@ -54,19 +54,6 @@ std::size_t BufferedInputStream::GetAvailableBytes()
 	return m_ReadSize - m_CurrentPosition + m_UnderlyingStream->GetAvailableBytes();
 }
 
-std::optional<std::byte> BufferedInputStream::ReadByte()
-{
-	std::byte value;
-	if (ReadBytes(gsl::make_span(&value, 1)))
-	{
-		return value;
-	}
-	else
-	{
-		return {};
-	}
-}
-
 std::size_t BufferedInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	const auto readSizeFromBuffer =
@@ -289,11 +276,6 @@ void BufferedOutputStream::Close()
 		m_UnderlyingStream = nullptr;
 		m_Buffer.reset();
 	}
-}
-
-bool BufferedOutputStream::WriteByte(std::byte value)
-{
-	return WriteBytes(gsl::make_span(&value, 1));
 }
 
 std::size_t BufferedOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)

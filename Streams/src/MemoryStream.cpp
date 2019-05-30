@@ -29,17 +29,6 @@ std::size_t MemoryStream::GetAvailableBytes()
 	return m_Storage.size() - m_CurrentPosition;
 }
 
-std::optional<std::byte> MemoryStream::ReadByte()
-{
-	std::byte value;
-	if (ReadBytes(gsl::make_span(&value, 1)))
-	{
-		return value;
-	}
-
-	return {};
-}
-
 std::size_t MemoryStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	const auto readSize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
@@ -94,11 +83,6 @@ std::size_t MemoryStream::GetTotalSize()
 	return m_Storage.size();
 }
 
-bool MemoryStream::WriteByte(std::byte value)
-{
-	return WriteBytes(gsl::make_span(&value, 1));
-}
-
 std::size_t MemoryStream::WriteBytes(gsl::span<const std::byte> const& buffer)
 {
 	const auto copySize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
@@ -138,17 +122,6 @@ std::size_t ExternalMemoryInputStream::GetAvailableBytes()
 	return m_Storage.size() - GetPosition();
 }
 
-std::optional<std::byte> ExternalMemoryInputStream::ReadByte()
-{
-	std::byte value;
-	if (ReadBytes(gsl::make_span(&value, 1)))
-	{
-		return value;
-	}
-
-	return {};
-}
-
 std::size_t ExternalMemoryInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	const auto readSize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
@@ -172,11 +145,6 @@ ExternalMemoryOutputStream::ExternalMemoryOutputStream(gsl::span<std::byte> cons
 
 ExternalMemoryOutputStream::~ExternalMemoryOutputStream()
 {
-}
-
-bool ExternalMemoryOutputStream::WriteByte(std::byte value)
-{
-	return WriteBytes(gsl::make_span(&value, 1));
 }
 
 std::size_t ExternalMemoryOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)

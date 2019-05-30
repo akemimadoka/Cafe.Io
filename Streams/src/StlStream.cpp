@@ -16,17 +16,6 @@ std::size_t StlInputStream::GetAvailableBytes()
 	return m_Stream.rdbuf()->in_avail();
 }
 
-std::optional<std::byte> StlInputStream::ReadByte()
-{
-	std::byte value;
-	if (ReadBytes(gsl::make_span(&value, 1)))
-	{
-		return value;
-	}
-
-	return {};
-}
-
 std::size_t StlInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	m_Stream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
@@ -86,11 +75,6 @@ StlOutputStream::StlOutputStream(std::ostream& stream) noexcept : m_Stream{ stre
 
 StlOutputStream::~StlOutputStream()
 {
-}
-
-bool StlOutputStream::WriteByte(std::byte value)
-{
-	return WriteBytes(gsl::make_span(&value, 1));
 }
 
 std::size_t StlOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
@@ -153,11 +137,6 @@ std::size_t StlInputOutputStream::GetAvailableBytes()
 	return StlInputStream{ m_Stream }.GetAvailableBytes();
 }
 
-std::optional<std::byte> StlInputOutputStream::ReadByte()
-{
-	return StlInputStream{ m_Stream }.ReadByte();
-}
-
 std::size_t StlInputOutputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
 	return StlInputStream{ m_Stream }.ReadBytes(buffer);
@@ -171,11 +150,6 @@ std::size_t StlInputOutputStream::ReadAvailableBytes(gsl::span<std::byte> const&
 std::size_t StlInputOutputStream::Skip(std::size_t n)
 {
 	return StlInputStream{ m_Stream }.Skip(n);
-}
-
-bool StlInputOutputStream::WriteByte(std::byte value)
-{
-	return StlOutputStream{ m_Stream }.WriteByte(value);
 }
 
 std::size_t StlInputOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)

@@ -29,7 +29,6 @@ namespace Cafe::Io
 		void Close() override;
 
 		std::size_t GetAvailableBytes() override;
-		std::optional<std::byte> ReadByte() override;
 		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
@@ -82,7 +81,6 @@ namespace Cafe::Io
 		///         之后流处于无效状态，不可进行除析构以外的任何操作
 		void Close() override;
 
-		bool WriteByte(std::byte value) override;
 		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
 		void Flush() override;
 

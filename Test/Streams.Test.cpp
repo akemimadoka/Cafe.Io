@@ -30,8 +30,11 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 		const auto storage = mappedStream.GetStorage();
 
 		REQUIRE(std::memcmp(Data, storage.data(), 10) == 0);
-	}
 
+		auto stdOutStream = FileOutputStream::CreateStdOutStream();
+		stdOutStream.WriteBytes(gsl::as_bytes(gsl::make_span("Hello?\n")));
+	}
+#endif
 	SECTION("MemoryStreams")
 	{
 		{
@@ -106,5 +109,4 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 			REQUIRE(std::memcmp(Data, buffer, 4) == 0);
 		}
 	}
-#endif
 }
