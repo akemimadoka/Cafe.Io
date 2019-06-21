@@ -24,6 +24,16 @@ namespace Cafe::Io
 			assert(m_UsingEndian == std::endian::little || m_UsingEndian == std::endian::big);
 		}
 
+		OutputStream* GetStream() const noexcept
+		{
+			return m_Stream;
+		}
+
+		std::endian GetUsingEndian() const noexcept
+		{
+			return m_UsingEndian;
+		}
+
 		template <typename T>
 		std::enable_if_t<std::is_scalar_v<T>, bool> Write(T const& value) const
 		{
