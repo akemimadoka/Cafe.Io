@@ -64,15 +64,26 @@ void MemoryStream::Seek(SeekOrigin origin, std::ptrdiff_t diff)
 		assert(!"Invalid origin");
 		[[fallthrough]];
 	case SeekOrigin::Begin:
-		assert(0 <= diff && diff <= m_Storage.size());
+		if (diff < 0 || diff > m_Storage.size())
+		{
+			CAFE_THROW(IoException, CAFE_UTF8_SV("Out of range."));
+		}
 		m_CurrentPosition = diff;
 		break;
 	case SeekOrigin::Current:
-		assert(-diff <= m_CurrentPosition && diff <= GetAvailableBytes());
+		if (diff < 0 ? -diff > m_CurrentPosition : diff > GetAvailableBytes())
+		{
+			CAFE_THROW(IoException, CAFE_UTF8_SV("Out of range."));
+		}
+
 		m_CurrentPosition += diff;
 		break;
 	case SeekOrigin::End:
-		assert(-diff <= m_Storage.size() && diff <= 0);
+		if (diff > 0 || -diff > m_Storage.size())
+		{
+			CAFE_THROW(IoException, CAFE_UTF8_SV("Out of range."));
+		}
+
 		m_CurrentPosition = m_Storage.size() + diff;
 		break;
 	}

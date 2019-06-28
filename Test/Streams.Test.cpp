@@ -42,9 +42,24 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 			const auto writtenSize = stream.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));
 			REQUIRE(writtenSize == 10);
 			REQUIRE(stream.GetPosition() == 10);
+			REQUIRE(stream.GetInternalStorage().size() == 10);
 
 			stream.SeekFromBegin(0);
 			REQUIRE(stream.GetPosition() == 0);
+
+			stream.Seek(SeekOrigin::Current, 4);
+			REQUIRE(stream.GetPosition() == 4);
+
+			stream.Seek(SeekOrigin::Current, -3);
+			REQUIRE(stream.GetPosition() == 1);
+
+			stream.Seek(SeekOrigin::Begin, 6);
+			REQUIRE(stream.GetPosition() == 6);
+
+			stream.Seek(SeekOrigin::End, -2);
+			REQUIRE(stream.GetPosition() == 8);
+
+			stream.SeekFromBegin(0);
 
 			std::byte buffer[10];
 			const auto readSize = stream.ReadBytes(gsl::make_span(buffer));
