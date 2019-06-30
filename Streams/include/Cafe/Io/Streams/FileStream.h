@@ -299,9 +299,9 @@ namespace Cafe::Io
 				return MapStream{ gsl::make_span(
 					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
 					      mappedAddress),
-					  size ? size : GetTotalSize()) };
+					  size ? size : this->GetTotalSize()) };
 #		else
-				const auto mappedSize = size ? size : GetTotalSize();
+				const auto mappedSize = size ? size : this->GetTotalSize();
 				const auto mappedFile =
 				    mmap64(nullptr, mappedSize,
 				           PROT_READ | (IsInputStream ? 0 : PROT_WRITE) | (executable ? PROT_EXEC : 0),
@@ -358,7 +358,7 @@ namespace Cafe::Io
 #		endif
 #	endif
 		};
-		
+
 		struct SpecifyNativeHandleTag
 		{
 			constexpr SpecifyNativeHandleTag() noexcept = default;
@@ -382,7 +382,8 @@ namespace Cafe::Io
 		/// @brief  直接以已获得的文件句柄构造
 		/// @param  fileHandle      文件句柄
 		/// @param  transferOwner   转移所有权，若为 true 则 Close() 会关闭此句柄
-		explicit FileInputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle, bool transferOwner = true);
+		explicit FileInputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle,
+		                         bool transferOwner = true);
 
 		FileInputStream(FileInputStream const&) = delete;
 		FileInputStream(FileInputStream&&) = default;
@@ -425,7 +426,8 @@ namespace Cafe::Io
 		/// @brief  直接以已获得的文件句柄构造
 		/// @param  fileHandle      文件句柄
 		/// @param  transferOwner   转移所有权，若为 true 则 Close() 会关闭此句柄
-		explicit FileOutputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle, bool transferOwner = true);
+		explicit FileOutputStream(Detail::SpecifyNativeHandleTag, NativeHandle fileHandle,
+		                          bool transferOwner = true);
 
 		FileOutputStream(FileOutputStream const&) = delete;
 		FileOutputStream(FileOutputStream&&) = default;

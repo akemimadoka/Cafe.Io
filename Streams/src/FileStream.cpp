@@ -11,7 +11,8 @@ FileInputStream::FileInputStream(std::filesystem::path const& path)
 FileInputStream::FileInputStream(Encoding::StringView<PathNativeCodePage> const& path)
 {
 	Encoding::String<PathNativeCodePage> pathStr;
-	const auto pathStrValue = path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData();
+	const auto pathStrValue = reinterpret_cast<const char*>(
+	    path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData());
 
 #if defined(_WIN32)
 	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ, FILE_SHARE_READ,
@@ -121,7 +122,8 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
                                    FileOpenMode openMode)
 {
 	Encoding::String<PathNativeCodePage> pathStr;
-	const auto pathStrValue = path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData();
+	const auto pathStrValue = reinterpret_cast<const char*>(
+	    path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData());
 
 #if defined(_WIN32)
 	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ | GENERIC_WRITE,
@@ -143,7 +145,7 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
 		break;
 	}
 #else
-	m_FileHandle = open(pathStrValue, openMode == FileOpenMode::Append ? O_APPEND : O_WRONLY);
+	m_FileHandle = open(pathStrValue, O_CREAT | (openMode == FileOpenMode::Append ? O_APPEND : O_WRONLY));
 
 	if (openMode == FileOpenMode::Truncate)
 	{
