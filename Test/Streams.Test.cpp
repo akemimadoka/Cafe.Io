@@ -2,6 +2,7 @@
 #include <Cafe/Io/Streams/FileStream.h>
 #include <Cafe/Io/Streams/MemoryStream.h>
 #include <catch2/catch.hpp>
+#include <cstring>
 
 using namespace Cafe;
 using namespace Io;
