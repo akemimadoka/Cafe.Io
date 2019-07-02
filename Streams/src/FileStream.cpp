@@ -145,13 +145,24 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
 		break;
 	}
 #else
-	m_FileHandle = open(pathStrValue, O_CREAT | (openMode == FileOpenMode::Append ? O_APPEND : O_WRONLY));
 
-	if (openMode == FileOpenMode::Truncate)
+	auto openModeValue = O_CREAT | O_RDWR;
+	switch (openMode)
 	{
-		// 分离 Truncate 实现是因为 O_TRUNC 未说明文件不存在时的行为，因此自己实现
-		ftruncate64(m_FileHandle, 0);
+	default:
+		assert(!"Invalid openMode.");
+		[[fallthrough]];
+	case FileOpenMode::Truncate:
+		openModeValue |= O_TRUNC;
+		break;
+	case FileOpenMode::Append:
+		openModeValue |= O_APPEND;
+		break;
+	case FileOpenMode::Overwrite:
+		break;
 	}
+
+	m_FileHandle = open(pathStrValue, openModeValue, S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 
 	if (m_FileHandle == InvalidHandleValue)
