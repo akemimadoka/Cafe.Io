@@ -28,6 +28,8 @@ namespace Cafe::Io
 		gsl::span<std::byte> GetInternalStorage() noexcept;
 		gsl::span<const std::byte> GetInternalStorage() const noexcept;
 
+		std::vector<std::byte> ReleaseStorage() noexcept;
+
 	private:
 		std::vector<std::byte> m_Storage;
 		std::size_t m_CurrentPosition;

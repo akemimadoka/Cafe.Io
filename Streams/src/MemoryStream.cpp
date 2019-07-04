@@ -118,6 +118,11 @@ gsl::span<const std::byte> MemoryStream::GetInternalStorage() const noexcept
 	return gsl::make_span(m_Storage);
 }
 
+std::vector<std::byte> MemoryStream::ReleaseStorage() noexcept
+{
+	return std::move(m_Storage);
+}
+
 ExternalMemoryInputStream::ExternalMemoryInputStream(
     gsl::span<const std::byte> const& storage) noexcept
     : ExternalMemoryStreamCommonPart{ storage }
