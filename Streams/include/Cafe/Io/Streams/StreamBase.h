@@ -14,7 +14,7 @@ namespace Cafe::Io
 	/// @brief  流
 	struct CAFE_PUBLIC Stream
 	{
-		virtual ~Stream();
+		virtual ~Stream() = 0;
 
 		/// @brief  关闭流，若流有刷新操作则进行刷新后再关闭
 		/// @remark 流关闭后可能处于任何状态，除非另有说明否则不可再进行除析构以外的操作

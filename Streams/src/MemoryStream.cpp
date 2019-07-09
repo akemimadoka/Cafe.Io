@@ -13,6 +13,11 @@ MemoryStream::MemoryStream(gsl::span<const std::byte> const& initialContent)
 {
 }
 
+MemoryStream::MemoryStream(std::vector<std::byte>&& initialStorage)
+    : m_Storage(std::move(initialStorage))
+{
+}
+
 MemoryStream::~MemoryStream()
 {
 }
@@ -125,7 +130,13 @@ std::vector<std::byte> MemoryStream::ReleaseStorage() noexcept
 
 ExternalMemoryInputStream::ExternalMemoryInputStream(
     gsl::span<const std::byte> const& storage) noexcept
-    : ExternalMemoryStreamCommonPart{ storage }
+    : ExternalMemoryStreamCommonPart{ storage, false }
+{
+}
+
+ExternalMemoryInputStream::ExternalMemoryInputStream(gsl::span<const std::byte> const& storage,
+                                                     Detail::ErrorOnOutOfRangeTag) noexcept
+    : ExternalMemoryStreamCommonPart{ storage, true }
 {
 }
 
@@ -140,7 +151,24 @@ std::size_t ExternalMemoryInputStream::GetAvailableBytes()
 
 std::size_t ExternalMemoryInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
 {
-	const auto readSize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
+	std::size_t readSize;
+	const auto bufferSize = static_cast<std::size_t>(buffer.size());
+	const auto availableSize = GetAvailableBytes();
+
+	if (bufferSize > availableSize)
+	{
+		if (m_ErrorOnOutOfRange)
+		{
+			CAFE_THROW(IoException, CAFE_UTF8_SV("Out of range."));
+		}
+
+		readSize = availableSize;
+	}
+	else
+	{
+		readSize = bufferSize;
+	}
+
 	std::memcpy(buffer.data(), m_CurrentPosition, readSize);
 	m_CurrentPosition += readSize;
 
@@ -155,7 +183,13 @@ std::size_t ExternalMemoryInputStream::Skip(std::size_t n)
 }
 
 ExternalMemoryOutputStream::ExternalMemoryOutputStream(gsl::span<std::byte> const& storage) noexcept
-    : ExternalMemoryStreamCommonPart{ storage }
+    : ExternalMemoryStreamCommonPart{ storage, false }
+{
+}
+
+ExternalMemoryOutputStream::ExternalMemoryOutputStream(gsl::span<std::byte> const& storage,
+                                                       Detail::ErrorOnOutOfRangeTag) noexcept
+    : ExternalMemoryStreamCommonPart{ storage, true }
 {
 }
 
@@ -165,8 +199,24 @@ ExternalMemoryOutputStream::~ExternalMemoryOutputStream()
 
 std::size_t ExternalMemoryOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
 {
-	const auto writtenSize =
-	    std::min(static_cast<std::size_t>(buffer.size()), m_Storage.size() - GetPosition());
+	std::size_t writtenSize;
+
+	const auto bufferSize = static_cast<std::size_t>(buffer.size());
+	const auto availableSize = m_Storage.size() - GetPosition();
+	if (bufferSize > availableSize)
+	{
+		if (m_ErrorOnOutOfRange)
+		{
+			CAFE_THROW(IoException, CAFE_UTF8_SV("Out of range."));
+		}
+
+		writtenSize = availableSize;
+	}
+	else
+	{
+		writtenSize = bufferSize;
+	}
+
 	std::memcpy(m_CurrentPosition, buffer.data(), writtenSize);
 	m_CurrentPosition += writtenSize;
 
