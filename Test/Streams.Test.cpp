@@ -100,6 +100,17 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 
 		MemoryStream stream;
 
+		[[maybe_unused]] const auto inputStream = static_cast<InputStream*>(&stream);
+		[[maybe_unused]] const auto outputStream = static_cast<OutputStream*>(&stream);
+		[[maybe_unused]] const auto inputOutputStream = static_cast<InputOutputStream*>(&stream);
+		[[maybe_unused]] const auto seekableInputStream =
+		    static_cast<SeekableStream<InputStream>*>(&stream);
+		[[maybe_unused]] const auto seekableOutputStream =
+		    static_cast<SeekableStream<OutputStream>*>(&stream);
+		[[maybe_unused]] const auto seekableInputOutputStream =
+		    static_cast<SeekableStream<InputOutputStream>*>(&stream);
+		[[maybe_unused]] const auto seekableStreamBase = static_cast<SeekableStreamBase*>(&stream);
+
 		{
 			BufferedOutputStream bufferedStream{ &stream };
 			const auto writtenSize = bufferedStream.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));

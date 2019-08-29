@@ -66,7 +66,7 @@ namespace Cafe::Io
 		virtual void Flush();
 	};
 
-	struct CAFE_PUBLIC InputOutputStream : InputStream, OutputStream
+	struct CAFE_PUBLIC InputOutputStream : virtual InputStream, virtual OutputStream
 	{
 		virtual ~InputOutputStream();
 	};
@@ -100,14 +100,22 @@ namespace Cafe::Io
 	/// @brief  可寻位流
 	/// @tparam BaseStream  基类流，为了减少菱形继承使用模板
 	template <typename BaseStream>
-	struct SeekableStream : BaseStream, SeekableStreamBase
+	struct SeekableStream : virtual BaseStream, virtual SeekableStreamBase
 	{
 		using BaseStream::BaseStream;
 
 		virtual ~SeekableStream() = default;
 	};
 
-	extern template class SeekableStream<InputStream>;
-	extern template class SeekableStream<OutputStream>;
-	extern template class SeekableStream<InputOutputStream>;
+	extern template struct SeekableStream<InputStream>;
+	extern template struct SeekableStream<OutputStream>;
+
+	template <>
+	struct SeekableStream<InputOutputStream>
+	    : SeekableStream<InputStream>, SeekableStream<OutputStream>, InputOutputStream
+	{
+		using InputOutputStream::InputOutputStream;
+
+		virtual ~SeekableStream() = default;
+	};
 } // namespace Cafe::Io
