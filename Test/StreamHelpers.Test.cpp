@@ -17,7 +17,7 @@ TEST_CASE("Cafe.Io.StreamHelpers", "[Io][StreamHelpers]")
 	SECTION("Test BinaryReader")
 	{
 		ExternalMemoryInputStream stream{ gsl::as_bytes(gsl::make_span(Data)) };
-		BinaryReader reader{ &stream, std::endian::little };
+		BinaryReader<> reader{ &stream, std::endian::little };
 
 		const auto u8 = reader.Read<std::uint8_t>();
 		REQUIRE(u8);
@@ -45,7 +45,7 @@ TEST_CASE("Cafe.Io.StreamHelpers", "[Io][StreamHelpers]")
 	{
 		std::byte buffer[15];
 		ExternalMemoryOutputStream stream{ gsl::make_span(buffer) };
-		BinaryWriter writer{ &stream, std::endian::little };
+		BinaryWriter<> writer{ &stream, std::endian::little };
 
 		writer.Write(std::uint8_t{ 0x01 });
 		writer.Write(std::uint16_t{ 0x0302 });

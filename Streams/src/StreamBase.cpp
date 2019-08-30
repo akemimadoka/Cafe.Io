@@ -79,11 +79,11 @@ InputOutputStream::~InputOutputStream()
 {
 }
 
-SeekableStreamBase::~SeekableStreamBase()
+SeekableStream<Stream>::~SeekableStream()
 {
 }
 
-void SeekableStreamBase::SeekFromBegin(std::size_t pos)
+void SeekableStream<Stream>::SeekFromBegin(std::size_t pos)
 {
 	if (pos <= static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()))
 	{
@@ -97,7 +97,7 @@ void SeekableStreamBase::SeekFromBegin(std::size_t pos)
 	}
 }
 
-std::size_t SeekableStreamBase::GetTotalSize()
+std::size_t SeekableStream<Stream>::GetTotalSize()
 {
 	const auto curPos = GetPosition();
 	CAFE_SCOPE_EXIT
@@ -109,6 +109,35 @@ std::size_t SeekableStreamBase::GetTotalSize()
 	return GetPosition();
 }
 
-template class SeekableStream<InputStream>;
-template class SeekableStream<OutputStream>;
-template class SeekableStream<InputOutputStream>;
+SeekableStream<InputStream>::~SeekableStream()
+{
+}
+
+std::size_t SeekableStream<InputStream>::Skip(std::size_t n)
+{
+	const auto skippingBytes = std::min(n, GetAvailableBytes());
+
+	if (skippingBytes > static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()))
+		[[unlikely]]
+		{
+			Seek(SeekOrigin::Current, std::numeric_limits<std::ptrdiff_t>::max());
+			Seek(SeekOrigin::Current,
+			     static_cast<std::ptrdiff_t>(
+			         skippingBytes -
+			         static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max())));
+		}
+	else
+	{
+		Seek(SeekOrigin::Current, static_cast<std::ptrdiff_t>(skippingBytes));
+	}
+
+	return skippingBytes;
+}
+
+SeekableStream<OutputStream>::~SeekableStream()
+{
+}
+
+SeekableStream<InputOutputStream>::~SeekableStream()
+{
+}

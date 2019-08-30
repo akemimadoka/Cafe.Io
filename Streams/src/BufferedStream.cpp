@@ -39,7 +39,7 @@ BufferedInputStream& BufferedInputStream::operator=(BufferedInputStream&& other)
 
 void BufferedInputStream::Close()
 {
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream);
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream);
 	    seekableStream && m_LastReadBufferPosition != std::size_t(-1))
 	{
 		seekableStream->SeekFromBegin(m_LastReadBufferPosition + m_CurrentPosition);
@@ -89,7 +89,7 @@ std::size_t BufferedInputStream::Skip(std::size_t n)
 
 std::size_t BufferedInputStream::GetPosition() const
 {
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		if (m_LastReadBufferPosition == std::size_t(-1))
 		{
@@ -103,7 +103,7 @@ std::size_t BufferedInputStream::GetPosition() const
 
 void BufferedInputStream::SeekFromBegin(std::size_t pos)
 {
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		seekableStream->SeekFromBegin(pos);
 		FlushBuffer(false);
@@ -123,7 +123,7 @@ void BufferedInputStream::Seek(SeekOrigin origin, std::ptrdiff_t diff)
 		return;
 	}
 
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		if (origin == SeekOrigin::Current)
 		{
@@ -140,7 +140,7 @@ void BufferedInputStream::Seek(SeekOrigin origin, std::ptrdiff_t diff)
 
 std::size_t BufferedInputStream::GetTotalSize()
 {
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		return seekableStream->GetTotalSize();
 	}
@@ -167,7 +167,7 @@ void BufferedInputStream::FlushBuffer(bool keep, std::size_t needSize)
 {
 	const auto keepSize = keep ? m_ReadSize - m_CurrentPosition : 0;
 	std::memmove(m_Buffer.get(), &m_Buffer[m_CurrentPosition], keepSize);
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		m_LastReadBufferPosition = seekableStream->GetPosition() - keepSize;
 	}
@@ -189,7 +189,7 @@ void BufferedInputStream::FillBuffer(bool keep, std::size_t needSize)
 {
 	const auto keepSize = keep ? m_ReadSize - m_CurrentPosition : 0;
 	std::memmove(m_Buffer.get(), &m_Buffer[m_CurrentPosition], keepSize);
-	if (const auto seekableStream = dynamic_cast<SeekableStreamBase*>(m_UnderlyingStream))
+	if (const auto seekableStream = dynamic_cast<SeekableStream<InputStream>*>(m_UnderlyingStream))
 	{
 		m_LastReadBufferPosition = seekableStream->GetPosition() - keepSize;
 	}

@@ -1,3 +1,4 @@
+set(CAFE_IO_STREAMS_USE_CONCEPTS ON CACHE BOOL "Use concepts in Cafe.Io.Streams")
 set(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM ON CACHE BOOL "Include FileStream in Cafe.Io.Streams")
 set(CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING ON CACHE BOOL "Enable file mapping in FileStreams")
 
@@ -30,6 +31,14 @@ target_include_directories(Cafe.Io.Streams PUBLIC
 
 target_link_libraries(Cafe.Io.Streams PUBLIC
     Cafe.ErrorHandling)
+
+if(CAFE_IO_STREAMS_USE_CONCEPTS)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        target_compile_options(Cafe.Io.Streams PUBLIC -fconcepts)
+    else()
+        message(FATAL "Compiler ${CMAKE_CXX_COMPILER_ID} does not support concept for now")
+    endif()
+endif()
 
 if(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM)
     if(CMAKE_SYSTEM_NAME MATCHES "Windows")

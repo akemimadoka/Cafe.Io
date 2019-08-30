@@ -13,10 +13,16 @@ namespace Cafe::Io
 	static_assert(std::endian::native == std::endian::little ||
 	              std::endian::native == std::endian::big);
 
+#if CAFE_IO_STREAMS_USE_CONCEPTS
+	template <OutputStreamConcept OutputStreamType = OutputStream>
+#else
+	template <typename OutputStreamType = OutputStream,
+	          std::enable_if_t<std::is_base_of_v<OutputStream, OutputStreamType>, int> = 0>
+#endif
 	class BinaryWriter
 	{
 	public:
-		explicit BinaryWriter(OutputStream* stream,
+		explicit BinaryWriter(OutputStreamType* stream,
 		                      std::endian usingEndian = std::endian::native) noexcept
 		    : m_Stream{ stream }, m_UsingEndian{ usingEndian }
 		{
@@ -24,7 +30,7 @@ namespace Cafe::Io
 			assert(m_UsingEndian == std::endian::little || m_UsingEndian == std::endian::big);
 		}
 
-		OutputStream* GetStream() const noexcept
+		OutputStreamType* GetStream() const noexcept
 		{
 			return m_Stream;
 		}
@@ -98,7 +104,7 @@ namespace Cafe::Io
 		}
 
 	private:
-		OutputStream* m_Stream;
+		OutputStreamType* m_Stream;
 		std::endian m_UsingEndian;
 	};
 } // namespace Cafe::Io

@@ -78,9 +78,16 @@ namespace Cafe::Io
 		End
 	};
 
-	struct CAFE_PUBLIC SeekableStreamBase
+	/// @brief  可寻位流
+	/// @tparam BaseStream  基类流，为了减少菱形继承使用模板
+	///                     仅能是 Stream InputStream OutputStream InputOutputStream
+	template <typename BaseStream>
+	struct SeekableStream;
+
+	template <>
+	struct CAFE_PUBLIC SeekableStream<Stream>
 	{
-		virtual ~SeekableStreamBase();
+		virtual ~SeekableStream();
 
 		virtual std::size_t GetPosition() const = 0;
 
@@ -97,25 +104,40 @@ namespace Cafe::Io
 		virtual std::size_t GetTotalSize();
 	};
 
-	/// @brief  可寻位流
-	/// @tparam BaseStream  基类流，为了减少菱形继承使用模板
-	template <typename BaseStream>
-	struct SeekableStream : virtual BaseStream, virtual SeekableStreamBase
+	template <>
+	struct CAFE_PUBLIC SeekableStream<InputStream> : virtual InputStream,
+	                                                 virtual SeekableStream<Stream>
 	{
-		using BaseStream::BaseStream;
+		virtual ~SeekableStream();
 
-		virtual ~SeekableStream() = default;
+		std::size_t Skip(std::size_t n) override;
 	};
-
-	extern template struct SeekableStream<InputStream>;
-	extern template struct SeekableStream<OutputStream>;
 
 	template <>
-	struct SeekableStream<InputOutputStream>
+	struct CAFE_PUBLIC SeekableStream<OutputStream> : virtual OutputStream,
+	                                                  virtual SeekableStream<Stream>
+	{
+		virtual ~SeekableStream();
+	};
+
+	template <>
+	struct CAFE_PUBLIC SeekableStream<InputOutputStream>
 	    : SeekableStream<InputStream>, SeekableStream<OutputStream>, InputOutputStream
 	{
-		using InputOutputStream::InputOutputStream;
-
-		virtual ~SeekableStream() = default;
+		virtual ~SeekableStream();
 	};
+
+#if CAFE_IO_STREAMS_USE_CONCEPTS
+	template <typename T>
+	concept InputStreamConcept = std::is_base_of_v<InputStream, T>;
+
+	template <typename T>
+	concept OutputStreamConcept = std::is_base_of_v<OutputStream, T>;
+
+	template <typename T>
+	concept InputOutputStreamConcept = InputStreamConcept<T>&& OutputStreamConcept<T>;
+
+	template <typename T>
+	concept SeekableStreamConcept = std::is_base_of_v<SeekableStream<Stream>, T>;
+#endif
 } // namespace Cafe::Io
