@@ -5,20 +5,20 @@ set(CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING ON CACHE BOOL "Enable file m
 configure_file(cmake/StreamConfig.h.in Cafe/Io/Streams/Config/StreamConfig.h)
 
 set(SOURCE_FILES
-    src/BufferedStream.cpp
-    src/MemoryStream.cpp
-    src/StlStream.cpp
-    src/StreamBase.cpp)
+    src/Cafe/Io/Streams/BufferedStream.cpp
+    src/Cafe/Io/Streams/MemoryStream.cpp
+    src/Cafe/Io/Streams/StlStream.cpp
+    src/Cafe/Io/Streams/StreamBase.cpp)
 
 set(HEADERS
-    include/Cafe/Io/Streams/BufferedStream.h
-    include/Cafe/Io/Streams/MemoryStream.h
-    include/Cafe/Io/Streams/StlStream.h
-    include/Cafe/Io/Streams/StreamBase.h)
+    src/Cafe/Io/Streams/BufferedStream.h
+    src/Cafe/Io/Streams/MemoryStream.h
+    src/Cafe/Io/Streams/StlStream.h
+    src/Cafe/Io/Streams/StreamBase.h)
 
 if(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM)
-    list(APPEND SOURCE_FILES src/FileStream.cpp)
-    list(APPEND HEADERS include/Cafe/Io/Streams/FileStream.h)
+    list(APPEND SOURCE_FILES src/Cafe/Io/Streams/FileStream.cpp)
+    list(APPEND HEADERS src/Cafe/Io/Streams/FileStream.h)
 endif()
 
 add_library(Cafe.Io.Streams ${SOURCE_FILES} ${HEADERS}
@@ -26,7 +26,7 @@ add_library(Cafe.Io.Streams ${SOURCE_FILES} ${HEADERS}
 
 target_include_directories(Cafe.Io.Streams PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(Cafe.Io.Streams PUBLIC
@@ -52,7 +52,7 @@ endif()
 install(TARGETS Cafe.Io.Streams
     EXPORT Io.Streams)
 
-install(DIRECTORY include/
+install(DIRECTORY src/
     TYPE INCLUDE
     FILES_MATCHING PATTERN "*.h")
 

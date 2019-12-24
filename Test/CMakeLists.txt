@@ -22,3 +22,5 @@ if(CAFE_IO_INCLUDE_STREAM_HELPERS)
     target_link_libraries(Cafe.Io.Test PRIVATE
         Cafe.Io.StreamHelpers)
 endif()
+
+ParseAndAddCatchTests(Cafe.Io.Test)
