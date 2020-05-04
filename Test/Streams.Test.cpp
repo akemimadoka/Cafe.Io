@@ -16,13 +16,13 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 	SECTION("FileStreams")
 	{
 		FileOutputStream tmpFile{ u"Temp.txt"_sv };
-		const auto writtenSize = tmpFile.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));
+		const auto writtenSize = tmpFile.WriteBytes(gsl::as_bytes(gsl::span(Data)));
 		REQUIRE(writtenSize == 10);
 		tmpFile.Close();
 
 		FileInputStream tmpFile2{ u"Temp.txt"_sv };
 		std::byte buffer[10];
-		const auto readSize = tmpFile2.ReadBytes(gsl::make_span(buffer));
+		const auto readSize = tmpFile2.ReadBytes(gsl::span(buffer));
 		REQUIRE(readSize == 10);
 
 		REQUIRE(std::memcmp(Data, buffer, 10) == 0);
@@ -33,14 +33,14 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 		REQUIRE(std::memcmp(Data, storage.data(), 10) == 0);
 
 		auto stdOutStream = FileOutputStream::CreateStdOutStream();
-		stdOutStream.WriteBytes(gsl::as_bytes(gsl::make_span("Hello?\n")));
+		stdOutStream.WriteBytes(gsl::as_bytes(gsl::span("Hello?\n")));
 	}
 #endif
 	SECTION("MemoryStreams")
 	{
 		{
 			MemoryStream stream;
-			const auto writtenSize = stream.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));
+			const auto writtenSize = stream.WriteBytes(gsl::as_bytes(gsl::span(Data)));
 			REQUIRE(writtenSize == 10);
 			REQUIRE(stream.GetPosition() == 10);
 			REQUIRE(stream.GetInternalStorage().size() == 10);
@@ -63,7 +63,7 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 			stream.SeekFromBegin(0);
 
 			std::byte buffer[10];
-			const auto readSize = stream.ReadBytes(gsl::make_span(buffer));
+			const auto readSize = stream.ReadBytes(gsl::span(buffer));
 			REQUIRE(readSize == 10);
 			REQUIRE(stream.GetPosition() == 10);
 
@@ -71,10 +71,10 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 		}
 
 		{
-			ExternalMemoryInputStream stream{ gsl::as_bytes(gsl::make_span(Data)) };
+			ExternalMemoryInputStream stream{ gsl::as_bytes(gsl::span(Data)) };
 
 			std::byte buffer[10];
-			const auto readSize = stream.ReadBytes(gsl::make_span(buffer));
+			const auto readSize = stream.ReadBytes(gsl::span(buffer));
 			REQUIRE(readSize == 10);
 			REQUIRE(stream.GetPosition() == 10);
 
@@ -84,9 +84,9 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 		{
 			std::byte buffer[10];
 
-			ExternalMemoryOutputStream stream{ gsl::make_span(buffer) };
+			ExternalMemoryOutputStream stream{ gsl::span(buffer) };
 
-			const auto writtenSize = stream.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));
+			const auto writtenSize = stream.WriteBytes(gsl::as_bytes(gsl::span(Data)));
 			REQUIRE(writtenSize == 10);
 			REQUIRE(stream.GetPosition() == 10);
 
@@ -113,7 +113,7 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 
 		{
 			BufferedOutputStream bufferedStream{ &stream };
-			const auto writtenSize = bufferedStream.WriteBytes(gsl::as_bytes(gsl::make_span(Data)));
+			const auto writtenSize = bufferedStream.WriteBytes(gsl::as_bytes(gsl::span(Data)));
 
 			REQUIRE(writtenSize == 4);
 			REQUIRE(stream.GetPosition() == 0);
@@ -129,7 +129,7 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 			std::byte buffer[4];
 
 			BufferedInputStream bufferedStream{ &stream };
-			const auto readSize = bufferedStream.ReadBytes(gsl::make_span(buffer));
+			const auto readSize = bufferedStream.ReadBytes(gsl::span(buffer));
 
 			REQUIRE(readSize == 4);
 

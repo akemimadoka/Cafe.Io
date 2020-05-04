@@ -9,7 +9,7 @@ MemoryStream::MemoryStream() : m_CurrentPosition{}
 }
 
 MemoryStream::MemoryStream(gsl::span<const std::byte> const& initialContent)
-    : m_Storage(initialContent.cbegin(), initialContent.cend()), m_CurrentPosition{}
+    : m_Storage(initialContent.begin(), initialContent.end()), m_CurrentPosition{}
 {
 }
 
@@ -115,12 +115,12 @@ std::size_t MemoryStream::WriteBytes(gsl::span<const std::byte> const& buffer)
 
 gsl::span<std::byte> MemoryStream::GetInternalStorage() noexcept
 {
-	return gsl::make_span(m_Storage);
+	return gsl::span(m_Storage.data(), m_Storage.size());
 }
 
 gsl::span<const std::byte> MemoryStream::GetInternalStorage() const noexcept
 {
-	return gsl::make_span(m_Storage);
+	return gsl::span(m_Storage.data(), m_Storage.size());
 }
 
 std::vector<std::byte> MemoryStream::ReleaseStorage() noexcept

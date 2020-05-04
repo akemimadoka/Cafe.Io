@@ -45,7 +45,7 @@ namespace Cafe::Io
 		{
 			if (m_UsingEndian == std::endian::native)
 			{
-				return m_Stream->WriteBytes(gsl::as_bytes(gsl::make_span(std::addressof(value), 1))) ==
+				return m_Stream->WriteBytes(gsl::as_bytes(gsl::span(std::addressof(value), 1))) ==
 				       sizeof(T);
 			}
 			else
@@ -64,7 +64,7 @@ namespace Cafe::Io
 #	else // _MSC_VER
 					writeValue = _byteswap_ushort(writeValue);
 #	endif
-					return m_Stream->WriteBytes(gsl::as_bytes(gsl::make_span(&writeValue, 1))) == 2;
+					return m_Stream->WriteBytes(gsl::as_bytes(gsl::span(&writeValue, 1))) == 2;
 				}
 				else if constexpr (sizeof(T) == 4)
 				{
@@ -75,7 +75,7 @@ namespace Cafe::Io
 #	else // _MSC_VER
 					writeValue = _byteswap_ulong(writeValue);
 #	endif
-					return m_Stream->WriteBytes(gsl::as_bytes(gsl::make_span(&writeValue, 1))) == 4;
+					return m_Stream->WriteBytes(gsl::as_bytes(gsl::span(&writeValue, 1))) == 4;
 				}
 				else if constexpr (sizeof(T) == 8)
 				{
@@ -86,7 +86,7 @@ namespace Cafe::Io
 #	else // _MSC_VER
 					writeValue = _byteswap_uint64(writeValue);
 #	endif
-					return m_Stream->WriteBytes(gsl::as_bytes(gsl::make_span(&writeValue, 1))) == 8;
+					return m_Stream->WriteBytes(gsl::as_bytes(gsl::span(&writeValue, 1))) == 8;
 				}
 #endif
 				else
@@ -98,7 +98,7 @@ namespace Cafe::Io
 					{
 						*pBuffer++ = *--p;
 					}
-					return m_Stream->WriteBytes(gsl::make_span(buffer)) == sizeof(T);
+					return m_Stream->WriteBytes(gsl::span(buffer)) == sizeof(T);
 				}
 			}
 		}

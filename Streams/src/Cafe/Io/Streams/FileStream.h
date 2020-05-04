@@ -37,7 +37,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path) noexcept
 	{
 		const auto& nativeString = path.native();
-		return gsl::make_span(
+		return gsl::span(
 		    reinterpret_cast<const Encoding::CodePage::CodePageTrait<
 		        Encoding::CodePage::Utf16LittleEndian>::CharType*>(nativeString.data()),
 		    nativeString.size());
@@ -49,7 +49,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path) noexcept
 	{
 		const auto& nativeString = path.native();
-		return gsl::make_span(
+		return gsl::span(
 		    reinterpret_cast<
 		        const Encoding::CodePage::CodePageTrait<Encoding::CodePage::Utf8>::CharType*>(
 		        nativeString.data()),
@@ -62,7 +62,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path)
 	{
 		const auto string = path.u8string();
-		return gsl::make_span(
+		return gsl::span(
 		    reinterpret_cast<
 		        const Encoding::CodePage::CodePageTrait<Encoding::CodePage::Utf8>::CharType*>(
 		        string.data()),
@@ -296,7 +296,7 @@ namespace Cafe::Io
 				m_FileMapping = fileMapping;
 				m_MappedFile = mappedAddress;
 
-				return MapStream{ gsl::make_span(
+				return MapStream{ gsl::span(
 					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
 					      mappedAddress),
 					  size ? size : this->GetTotalSize()) };
@@ -314,7 +314,7 @@ namespace Cafe::Io
 				m_FileView = mappedFile;
 				m_FileViewSize = mappedSize;
 
-				return MapStream{ gsl::make_span(
+				return MapStream{ gsl::span(
 					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(mappedFile),
 					  mappedSize) };
 #		endif

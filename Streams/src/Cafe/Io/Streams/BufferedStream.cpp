@@ -173,7 +173,7 @@ void BufferedInputStream::FlushBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(gsl::make_span(
+		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(gsl::span(
 		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
@@ -195,7 +195,7 @@ void BufferedInputStream::FillBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadBytes(gsl::make_span(
+		const auto readSize = m_UnderlyingStream->ReadBytes(gsl::span(
 		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
@@ -302,7 +302,7 @@ void BufferedOutputStream::Flush()
 {
 	if (m_CurrentPosition)
 	{
-		m_UnderlyingStream->WriteBytes(gsl::make_span(m_Buffer.get(), m_CurrentPosition));
+		m_UnderlyingStream->WriteBytes(gsl::span(m_Buffer.get(), m_CurrentPosition));
 		m_CurrentPosition = 0;
 	}
 }

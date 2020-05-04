@@ -47,7 +47,7 @@ namespace Cafe::Io
 			{
 				T readValue;
 				if (m_Stream->ReadBytes(
-				        gsl::as_writeable_bytes(gsl::make_span(std::addressof(readValue), 1))) != sizeof(T))
+				        gsl::as_writable_bytes(gsl::span(std::addressof(readValue), 1))) != sizeof(T))
 				{
 					return false;
 				}
@@ -69,7 +69,7 @@ namespace Cafe::Io
 				else if constexpr (sizeof(T) == 2)
 				{
 					std::uint16_t readValue;
-					if (m_Stream->ReadBytes(gsl::as_writeable_bytes(gsl::make_span(&readValue, 1))) != 2)
+					if (m_Stream->ReadBytes(gsl::as_writable_bytes(gsl::span(&readValue, 1))) != 2)
 					{
 						return false;
 					}
@@ -83,7 +83,7 @@ namespace Cafe::Io
 				else if constexpr (sizeof(T) == 4)
 				{
 					std::uint32_t readValue;
-					if (m_Stream->ReadBytes(gsl::as_writeable_bytes(gsl::make_span(&readValue, 1))) != 4)
+					if (m_Stream->ReadBytes(gsl::as_writable_bytes(gsl::span(&readValue, 1))) != 4)
 					{
 						return false;
 					}
@@ -97,7 +97,7 @@ namespace Cafe::Io
 				else if constexpr (sizeof(T) == 8)
 				{
 					std::uint64_t readValue;
-					if (m_Stream->ReadBytes(gsl::as_writeable_bytes(gsl::make_span(&readValue, 1))) != 8)
+					if (m_Stream->ReadBytes(gsl::as_writable_bytes(gsl::span(&readValue, 1))) != 8)
 					{
 						return false;
 					}
@@ -112,7 +112,7 @@ namespace Cafe::Io
 				else
 				{
 					std::byte buffer[sizeof(T)];
-					if (m_Stream->ReadBytes(gsl::make_span(buffer)) != sizeof(T))
+					if (m_Stream->ReadBytes(gsl::span(buffer)) != sizeof(T))
 					{
 						return false;
 					}
