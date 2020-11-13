@@ -47,7 +47,7 @@ std::size_t FileInputStream::GetAvailableBytes()
 	return GetTotalSize() - GetPosition();
 }
 
-std::size_t FileInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t FileInputStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	if (buffer.empty())
 	{
@@ -186,7 +186,7 @@ FileOutputStream::~FileOutputStream()
 {
 }
 
-std::size_t FileOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t FileOutputStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	if (buffer.empty())
 	{

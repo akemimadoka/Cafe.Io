@@ -8,7 +8,7 @@ MemoryStream::MemoryStream() : m_CurrentPosition{}
 {
 }
 
-MemoryStream::MemoryStream(gsl::span<const std::byte> const& initialContent)
+MemoryStream::MemoryStream(std::span<const std::byte> const& initialContent)
     : m_Storage(initialContent.begin(), initialContent.end()), m_CurrentPosition{}
 {
 }
@@ -34,7 +34,7 @@ std::size_t MemoryStream::GetAvailableBytes()
 	return m_Storage.size() - m_CurrentPosition;
 }
 
-std::size_t MemoryStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t MemoryStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	const auto readSize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
 	std::memcpy(buffer.data(), m_Storage.data() + m_CurrentPosition, readSize);
@@ -99,7 +99,7 @@ std::size_t MemoryStream::GetTotalSize()
 	return m_Storage.size();
 }
 
-std::size_t MemoryStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t MemoryStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	const auto copySize = std::min(static_cast<std::size_t>(buffer.size()), GetAvailableBytes());
 	std::memcpy(m_Storage.data() + m_CurrentPosition, buffer.data(), copySize);
@@ -113,14 +113,14 @@ std::size_t MemoryStream::WriteBytes(gsl::span<const std::byte> const& buffer)
 	return buffer.size();
 }
 
-gsl::span<std::byte> MemoryStream::GetInternalStorage() noexcept
+std::span<std::byte> MemoryStream::GetInternalStorage() noexcept
 {
-	return gsl::span(m_Storage.data(), m_Storage.size());
+	return std::span(m_Storage.data(), m_Storage.size());
 }
 
-gsl::span<const std::byte> MemoryStream::GetInternalStorage() const noexcept
+std::span<const std::byte> MemoryStream::GetInternalStorage() const noexcept
 {
-	return gsl::span(m_Storage.data(), m_Storage.size());
+	return std::span(m_Storage.data(), m_Storage.size());
 }
 
 std::vector<std::byte> MemoryStream::ReleaseStorage() noexcept
@@ -129,12 +129,12 @@ std::vector<std::byte> MemoryStream::ReleaseStorage() noexcept
 }
 
 ExternalMemoryInputStream::ExternalMemoryInputStream(
-    gsl::span<const std::byte> const& storage) noexcept
+    std::span<const std::byte> const& storage) noexcept
     : ExternalMemoryStreamCommonPart{ storage, false }
 {
 }
 
-ExternalMemoryInputStream::ExternalMemoryInputStream(gsl::span<const std::byte> const& storage,
+ExternalMemoryInputStream::ExternalMemoryInputStream(std::span<const std::byte> const& storage,
                                                      Detail::ErrorOnOutOfRangeTag) noexcept
     : ExternalMemoryStreamCommonPart{ storage, true }
 {
@@ -149,7 +149,7 @@ std::size_t ExternalMemoryInputStream::GetAvailableBytes()
 	return m_Storage.size() - GetPosition();
 }
 
-std::size_t ExternalMemoryInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t ExternalMemoryInputStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	std::size_t readSize;
 	const auto bufferSize = static_cast<std::size_t>(buffer.size());
@@ -182,12 +182,12 @@ std::size_t ExternalMemoryInputStream::Skip(std::size_t n)
 	return skippedSize;
 }
 
-ExternalMemoryOutputStream::ExternalMemoryOutputStream(gsl::span<std::byte> const& storage) noexcept
+ExternalMemoryOutputStream::ExternalMemoryOutputStream(std::span<std::byte> const& storage) noexcept
     : ExternalMemoryStreamCommonPart{ storage, false }
 {
 }
 
-ExternalMemoryOutputStream::ExternalMemoryOutputStream(gsl::span<std::byte> const& storage,
+ExternalMemoryOutputStream::ExternalMemoryOutputStream(std::span<std::byte> const& storage,
                                                        Detail::ErrorOnOutOfRangeTag) noexcept
     : ExternalMemoryStreamCommonPart{ storage, true }
 {
@@ -197,7 +197,7 @@ ExternalMemoryOutputStream::~ExternalMemoryOutputStream()
 {
 }
 
-std::size_t ExternalMemoryOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t ExternalMemoryOutputStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	std::size_t writtenSize;
 

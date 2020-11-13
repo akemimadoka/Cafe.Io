@@ -9,14 +9,14 @@ namespace Cafe::Io
 	{
 	public:
 		MemoryStream();
-		explicit MemoryStream(gsl::span<const std::byte> const& initialContent);
+		explicit MemoryStream(std::span<const std::byte> const& initialContent);
 		explicit MemoryStream(std::vector<std::byte>&& initialStorage);
 		~MemoryStream();
 
 		void Close() override;
 
 		std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
 		std::size_t GetPosition() const override;
@@ -24,10 +24,10 @@ namespace Cafe::Io
 		void Seek(SeekOrigin origin, std::ptrdiff_t diff) override;
 		std::size_t GetTotalSize() override;
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 
-		gsl::span<std::byte> GetInternalStorage() noexcept;
-		gsl::span<const std::byte> GetInternalStorage() const noexcept;
+		std::span<std::byte> GetInternalStorage() noexcept;
+		std::span<const std::byte> GetInternalStorage() const noexcept;
 
 		std::vector<std::byte> ReleaseStorage() noexcept;
 
@@ -45,7 +45,7 @@ namespace Cafe::Io
 			    std::conditional_t<std::is_same_v<BaseStream, InputStream>, const std::byte, std::byte>;
 
 		protected:
-			explicit ExternalMemoryStreamCommonPart(gsl::span<ElementType> const& storage,
+			explicit ExternalMemoryStreamCommonPart(std::span<ElementType> const& storage,
 			                                        bool errorOnOutOfRange) noexcept
 			    : m_Storage{ storage }, m_CurrentPosition{ m_Storage.data() }, m_ErrorOnOutOfRange{
 				      errorOnOutOfRange
@@ -92,13 +92,13 @@ namespace Cafe::Io
 				return m_Storage.size();
 			}
 
-			gsl::span<ElementType> GetStorage() const noexcept
+			std::span<ElementType> GetStorage() const noexcept
 			{
 				return m_Storage;
 			}
 
 		protected:
-			gsl::span<ElementType> m_Storage;
+			std::span<ElementType> m_Storage;
 			ElementType* m_CurrentPosition;
 			bool m_ErrorOnOutOfRange;
 		};
@@ -114,13 +114,13 @@ namespace Cafe::Io
 	    : public Detail::ExternalMemoryStreamCommonPart<InputStream>
 	{
 	public:
-		explicit ExternalMemoryInputStream(gsl::span<const std::byte> const& storage) noexcept;
-		ExternalMemoryInputStream(gsl::span<const std::byte> const& storage,
+		explicit ExternalMemoryInputStream(std::span<const std::byte> const& storage) noexcept;
+		ExternalMemoryInputStream(std::span<const std::byte> const& storage,
 		                          Detail::ErrorOnOutOfRangeTag) noexcept;
 		~ExternalMemoryInputStream();
 
 		std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 	};
 
@@ -128,11 +128,11 @@ namespace Cafe::Io
 	    : public Detail::ExternalMemoryStreamCommonPart<OutputStream>
 	{
 	public:
-		explicit ExternalMemoryOutputStream(gsl::span<std::byte> const& storage) noexcept;
-		ExternalMemoryOutputStream(gsl::span<std::byte> const& storage,
+		explicit ExternalMemoryOutputStream(std::span<std::byte> const& storage) noexcept;
+		ExternalMemoryOutputStream(std::span<std::byte> const& storage,
 		                           Detail::ErrorOnOutOfRangeTag) noexcept;
 		~ExternalMemoryOutputStream();
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 	};
 } // namespace Cafe::Io

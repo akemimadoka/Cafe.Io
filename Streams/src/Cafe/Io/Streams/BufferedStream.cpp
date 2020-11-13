@@ -54,7 +54,7 @@ std::size_t BufferedInputStream::GetAvailableBytes()
 	return m_ReadSize - m_CurrentPosition + m_UnderlyingStream->GetAvailableBytes();
 }
 
-std::size_t BufferedInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t BufferedInputStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	const auto readSizeFromBuffer =
 	    std::min(m_ReadSize - m_CurrentPosition, static_cast<std::size_t>(buffer.size()));
@@ -173,7 +173,7 @@ void BufferedInputStream::FlushBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(gsl::span(
+		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(std::span(
 		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
@@ -195,7 +195,7 @@ void BufferedInputStream::FillBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadBytes(gsl::span(
+		const auto readSize = m_UnderlyingStream->ReadBytes(std::span(
 		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
@@ -228,7 +228,7 @@ std::optional<std::byte> BufferedInputStream::PeekByte()
 	return m_Buffer[m_CurrentPosition];
 }
 
-std::size_t BufferedInputStream::PeekBytes(gsl::span<std::byte> const& buffer)
+std::size_t BufferedInputStream::PeekBytes(std::span<std::byte> const& buffer)
 {
 	FillBuffer(true, buffer.size());
 
@@ -278,7 +278,7 @@ void BufferedOutputStream::Close()
 	}
 }
 
-std::size_t BufferedOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t BufferedOutputStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	const auto writeSizeToBuffer =
 	    std::min(m_BufferSize - m_CurrentPosition, static_cast<std::size_t>(buffer.size()));
@@ -302,7 +302,7 @@ void BufferedOutputStream::Flush()
 {
 	if (m_CurrentPosition)
 	{
-		m_UnderlyingStream->WriteBytes(gsl::span(m_Buffer.get(), m_CurrentPosition));
+		m_UnderlyingStream->WriteBytes(std::span(m_Buffer.get(), m_CurrentPosition));
 		m_CurrentPosition = 0;
 	}
 }

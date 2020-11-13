@@ -29,7 +29,7 @@ namespace Cafe::Io
 		void Close() override;
 
 		std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
 		std::size_t GetPosition() const override;
@@ -46,7 +46,7 @@ namespace Cafe::Io
 		std::optional<std::byte> PeekByte();
 		/// @brief  不消费地读取一段数据
 		/// @remark 若 buffer 大小大于实际缓存大小，仅会读取实际缓存
-		std::size_t PeekBytes(gsl::span<std::byte> const& buffer);
+		std::size_t PeekBytes(std::span<std::byte> const& buffer);
 
 	private:
 		InputStream* m_UnderlyingStream;
@@ -81,7 +81,7 @@ namespace Cafe::Io
 		///         之后流处于无效状态，不可进行除析构以外的任何操作
 		void Close() override;
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 		void Flush() override;
 
 	private:

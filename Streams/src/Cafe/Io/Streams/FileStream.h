@@ -37,7 +37,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path) noexcept
 	{
 		const auto& nativeString = path.native();
-		return gsl::span(
+		return std::span(
 		    reinterpret_cast<const Encoding::CodePage::CodePageTrait<
 		        Encoding::CodePage::Utf16LittleEndian>::CharType*>(nativeString.data()),
 		    nativeString.size());
@@ -49,7 +49,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path) noexcept
 	{
 		const auto& nativeString = path.native();
-		return gsl::span(
+		return std::span(
 		    reinterpret_cast<
 		        const Encoding::CodePage::CodePageTrait<Encoding::CodePage::Utf8>::CharType*>(
 		        nativeString.data()),
@@ -62,7 +62,7 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path)
 	{
 		const auto string = path.u8string();
-		return gsl::span(
+		return std::span(
 		    reinterpret_cast<
 		        const Encoding::CodePage::CodePageTrait<Encoding::CodePage::Utf8>::CharType*>(
 		        string.data()),
@@ -296,7 +296,7 @@ namespace Cafe::Io
 				m_FileMapping = fileMapping;
 				m_MappedFile = mappedAddress;
 
-				return MapStream{ gsl::span(
+				return MapStream{ std::span(
 					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
 					      mappedAddress),
 					  size ? size : this->GetTotalSize()) };
@@ -314,7 +314,7 @@ namespace Cafe::Io
 				m_FileView = mappedFile;
 				m_FileViewSize = mappedSize;
 
-				return MapStream{ gsl::span(
+				return MapStream{ std::span(
 					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(mappedFile),
 					  mappedSize) };
 #		endif
@@ -394,7 +394,7 @@ namespace Cafe::Io
 		FileInputStream& operator=(FileInputStream&&) = default;
 
 		std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
 
 		std::size_t Skip(std::size_t n) override;
 
@@ -437,7 +437,7 @@ namespace Cafe::Io
 		FileOutputStream& operator=(FileOutputStream const&) = delete;
 		FileOutputStream& operator=(FileOutputStream&&) = default;
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 		void Flush() override;
 
 		static FileOutputStream CreateStdOutStream();

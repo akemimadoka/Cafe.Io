@@ -4,7 +4,7 @@
 #include <Cafe/ErrorHandling/ErrorHandling.h>
 #include <Cafe/Misc/Scope.h>
 #include <cstddef>
-#include <gsl/span>
+#include <span>
 #include <optional>
 
 namespace Cafe::Io
@@ -29,7 +29,7 @@ namespace Cafe::Io
 
 		/// @brief  获得当前可用的字节数
 		/// @remark 若对于当前类无意义或无法实现则结果为 0
-		/// @see    InputStream::ReadAvailableBytes(gsl::span<std::byte> const&)
+		/// @see    InputStream::ReadAvailableBytes(std::span<std::byte> const&)
 		virtual std::size_t GetAvailableBytes() = 0;
 
 		/// @brief  从流中读取一个字节
@@ -38,12 +38,12 @@ namespace Cafe::Io
 		/// @brief  从流中读取多个字节，读取的个数为 buffer 的大小
 		/// @remark 若读取长度大于可用字节数，则阻塞到读取到足够字节数再返回
 		/// @return 读取的长度，若为 0 则表示流已到结尾或 buffer 大小为 0，其他异常情况将会抛出
-		virtual std::size_t ReadBytes(gsl::span<std::byte> const& buffer) = 0;
+		virtual std::size_t ReadBytes(std::span<std::byte> const& buffer) = 0;
 
 		/// @brief  从流中读取有效字节，读取的个数最多不超过 buffer 的大小
 		/// @remark 本方法不会阻塞，若有效字节数不足够填充整个 buffer 则只会填充已有的部分
 		///         当 InputStream::GetAvailableBytes() 无效时，本方法立即返回且不读取任何内容
-		virtual std::size_t ReadAvailableBytes(gsl::span<std::byte> const& buffer);
+		virtual std::size_t ReadAvailableBytes(std::span<std::byte> const& buffer);
 
 		/// @brief  跳过 n 个字节
 		/// @remark 可能阻塞并消费字节，若可能则推荐使用 SeekableStream::Seek
@@ -60,7 +60,7 @@ namespace Cafe::Io
 
 		/// @brief  写入多个字节到流内，buffer 内全部数据都将写出，并阻塞到写入完成为止
 		/// @return 写入的字节数，仅供参考，对于特殊的流可能无意义或有其他特殊含义
-		virtual std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) = 0;
+		virtual std::size_t WriteBytes(std::span<const std::byte> const& buffer) = 0;
 
 		/// @brief  刷新流，确保数据成功刷新，对于无缓存的流可能无操作
 		virtual void Flush();

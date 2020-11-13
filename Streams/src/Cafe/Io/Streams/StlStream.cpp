@@ -16,13 +16,13 @@ std::size_t StlInputStream::GetAvailableBytes()
 	return m_Stream.rdbuf()->in_avail();
 }
 
-std::size_t StlInputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t StlInputStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	m_Stream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
 	return m_Stream.gcount();
 }
 
-std::size_t StlInputStream::ReadAvailableBytes(gsl::span<std::byte> const& buffer)
+std::size_t StlInputStream::ReadAvailableBytes(std::span<std::byte> const& buffer)
 {
 	return m_Stream.readsome(reinterpret_cast<char*>(buffer.data()), buffer.size());
 }
@@ -77,7 +77,7 @@ StlOutputStream::~StlOutputStream()
 {
 }
 
-std::size_t StlOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t StlOutputStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	const auto curPos = m_Stream.tellp();
 	m_Stream.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
@@ -137,12 +137,12 @@ std::size_t StlInputOutputStream::GetAvailableBytes()
 	return StlInputStream{ m_Stream }.GetAvailableBytes();
 }
 
-std::size_t StlInputOutputStream::ReadBytes(gsl::span<std::byte> const& buffer)
+std::size_t StlInputOutputStream::ReadBytes(std::span<std::byte> const& buffer)
 {
 	return StlInputStream{ m_Stream }.ReadBytes(buffer);
 }
 
-std::size_t StlInputOutputStream::ReadAvailableBytes(gsl::span<std::byte> const& buffer)
+std::size_t StlInputOutputStream::ReadAvailableBytes(std::span<std::byte> const& buffer)
 {
 	return StlInputStream{ m_Stream }.ReadAvailableBytes(buffer);
 }
@@ -152,7 +152,7 @@ std::size_t StlInputOutputStream::Skip(std::size_t n)
 	return StlInputStream{ m_Stream }.Skip(n);
 }
 
-std::size_t StlInputOutputStream::WriteBytes(gsl::span<const std::byte> const& buffer)
+std::size_t StlInputOutputStream::WriteBytes(std::span<const std::byte> const& buffer)
 {
 	return StlOutputStream{ m_Stream }.WriteBytes(buffer);
 }

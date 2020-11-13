@@ -12,8 +12,8 @@ namespace Cafe::Io
 		~StlInputStream();
 
 		std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
-		std::size_t ReadAvailableBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
+		std::size_t ReadAvailableBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
 		std::size_t GetPosition() const override;
@@ -32,7 +32,7 @@ namespace Cafe::Io
 		explicit StlOutputStream(std::ostream& stream) noexcept;
 		~StlOutputStream();
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 		void Flush();
 
 		std::size_t GetPosition() const override;
@@ -52,11 +52,11 @@ namespace Cafe::Io
 		~StlInputOutputStream();
 
         std::size_t GetAvailableBytes() override;
-		std::size_t ReadBytes(gsl::span<std::byte> const& buffer) override;
-		std::size_t ReadAvailableBytes(gsl::span<std::byte> const& buffer) override;
+		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
+		std::size_t ReadAvailableBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;
 
-		std::size_t WriteBytes(gsl::span<const std::byte> const& buffer) override;
+		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
 		void Flush();
 
 		std::size_t GetPosition() const override;
