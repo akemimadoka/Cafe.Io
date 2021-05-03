@@ -109,7 +109,8 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 		    static_cast<SeekableStream<OutputStream>*>(&stream);
 		[[maybe_unused]] const auto seekableInputOutputStream =
 		    static_cast<SeekableStream<InputOutputStream>*>(&stream);
-		[[maybe_unused]] const auto seekableStreamBase = static_cast<SeekableStream<Stream>*>(&stream);
+		[[maybe_unused]] const auto seekableStreamBase =
+		    static_cast<SeekableStream<Stream>*>(&stream);
 
 		{
 			BufferedOutputStream bufferedStream{ &stream };

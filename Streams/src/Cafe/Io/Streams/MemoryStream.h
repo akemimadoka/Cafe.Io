@@ -41,8 +41,8 @@ namespace Cafe::Io
 		template <typename BaseStream>
 		class ExternalMemoryStreamCommonPart : public SeekableStream<BaseStream>
 		{
-			using ElementType =
-			    std::conditional_t<std::is_same_v<BaseStream, InputStream>, const std::byte, std::byte>;
+			using ElementType = std::conditional_t<std::is_same_v<BaseStream, InputStream>,
+			                                       const std::byte, std::byte>;
 
 		protected:
 			explicit ExternalMemoryStreamCommonPart(std::span<ElementType> const& storage,

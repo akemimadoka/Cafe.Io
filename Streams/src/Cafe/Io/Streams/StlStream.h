@@ -51,7 +51,7 @@ namespace Cafe::Io
 		explicit StlInputOutputStream(std::iostream& stream) noexcept;
 		~StlInputOutputStream();
 
-        std::size_t GetAvailableBytes() override;
+		std::size_t GetAvailableBytes() override;
 		std::size_t ReadBytes(std::span<std::byte> const& buffer) override;
 		std::size_t ReadAvailableBytes(std::span<std::byte> const& buffer) override;
 		std::size_t Skip(std::size_t n) override;

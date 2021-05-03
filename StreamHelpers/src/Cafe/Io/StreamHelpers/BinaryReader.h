@@ -46,8 +46,8 @@ namespace Cafe::Io
 			if (m_UsingEndian == std::endian::native)
 			{
 				T readValue;
-				if (m_Stream->ReadBytes(
-				        std::as_writable_bytes(std::span(std::addressof(readValue), 1))) != sizeof(T))
+				if (m_Stream->ReadBytes(std::as_writable_bytes(
+				        std::span(std::addressof(readValue), 1))) != sizeof(T))
 				{
 					return false;
 				}

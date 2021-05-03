@@ -48,8 +48,7 @@ std::size_t InputStream::Skip(std::size_t n)
 	std::byte buffer[DefaultSkipBufferSize];
 	while (remainedBytes)
 	{
-		const auto readBytes =
-		    ReadBytes(std::span(buffer, std::min(sizeof buffer, remainedBytes)));
+		const auto readBytes = ReadBytes(std::span(buffer, std::min(sizeof buffer, remainedBytes)));
 		if (!readBytes)
 		{
 			// 出现错误，返回
@@ -118,14 +117,14 @@ std::size_t SeekableStream<InputStream>::Skip(std::size_t n)
 	const auto skippingBytes = std::min(n, GetAvailableBytes());
 
 	if (skippingBytes > static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()))
-		[[unlikely]]
-		{
-			Seek(SeekOrigin::Current, std::numeric_limits<std::ptrdiff_t>::max());
-			Seek(SeekOrigin::Current,
-			     static_cast<std::ptrdiff_t>(
-			         skippingBytes -
-			         static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max())));
-		}
+	    [[unlikely]]
+	{
+		Seek(SeekOrigin::Current, std::numeric_limits<std::ptrdiff_t>::max());
+		Seek(SeekOrigin::Current,
+		     static_cast<std::ptrdiff_t>(
+		         skippingBytes -
+		         static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max())));
+	}
 	else
 	{
 		Seek(SeekOrigin::Current, static_cast<std::ptrdiff_t>(skippingBytes));

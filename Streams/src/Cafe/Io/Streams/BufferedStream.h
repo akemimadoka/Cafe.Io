@@ -68,7 +68,8 @@ namespace Cafe::Io
 	public:
 		static constexpr std::size_t DefaultBufferSize = 1024;
 
-		explicit BufferedOutputStream(OutputStream* stream, std::size_t bufferSize = DefaultBufferSize);
+		explicit BufferedOutputStream(OutputStream* stream,
+		                              std::size_t bufferSize = DefaultBufferSize);
 		BufferedOutputStream(BufferedOutputStream const&) = delete;
 		BufferedOutputStream(BufferedOutputStream&& other) noexcept;
 

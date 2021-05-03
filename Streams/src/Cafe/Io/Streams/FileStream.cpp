@@ -15,8 +15,9 @@ FileInputStream::FileInputStream(Encoding::StringView<PathNativeCodePage> const&
 	    path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData());
 
 #if defined(_WIN32)
-	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ, FILE_SHARE_READ,
-	                           nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr);
+	m_FileHandle =
+	    CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ, FILE_SHARE_READ, nullptr,
+	                OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr);
 #else
 	m_FileHandle = open(pathStrValue, O_RDONLY);
 #endif
@@ -63,8 +64,8 @@ std::size_t FileInputStream::ReadBytes(std::span<std::byte> const& buffer)
 	while (size)
 	{
 		if (!ReadFile(m_FileHandle, data,
-		              static_cast<DWORD>(
-		                  std::min(size, static_cast<std::size_t>(std::numeric_limits<DWORD>::max()))),
+		              static_cast<DWORD>(std::min(
+		                  size, static_cast<std::size_t>(std::numeric_limits<DWORD>::max()))),
 		              &readSize, NULL))
 		{
 			CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot read file."));
@@ -126,8 +127,9 @@ FileOutputStream::FileOutputStream(Encoding::StringView<PathNativeCodePage> cons
 	    path.IsNullTerminated() ? path.GetData() : (pathStr = path).GetData());
 
 #if defined(_WIN32)
-	m_FileHandle = CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ | GENERIC_WRITE,
-	                           0, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	m_FileHandle =
+	    CreateFileW(reinterpret_cast<LPCWSTR>(pathStrValue), GENERIC_READ | GENERIC_WRITE, 0,
+	                nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	switch (openMode)
 	{
@@ -202,8 +204,8 @@ std::size_t FileOutputStream::WriteBytes(std::span<const std::byte> const& buffe
 	while (size)
 	{
 		if (!WriteFile(m_FileHandle, data,
-		               static_cast<DWORD>(
-		                   std::min(size, static_cast<std::size_t>(std::numeric_limits<DWORD>::max()))),
+		               static_cast<DWORD>(std::min(
+		                   size, static_cast<std::size_t>(std::numeric_limits<DWORD>::max()))),
 		               &writtenSize, nullptr))
 		{
 			CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot write file."));

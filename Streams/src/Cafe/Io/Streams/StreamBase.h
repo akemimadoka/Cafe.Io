@@ -4,8 +4,8 @@
 #include <Cafe/ErrorHandling/ErrorHandling.h>
 #include <Cafe/Misc/Scope.h>
 #include <cstddef>
-#include <span>
 #include <optional>
+#include <span>
 
 namespace Cafe::Io
 {
@@ -135,7 +135,7 @@ namespace Cafe::Io
 	concept OutputStreamConcept = std::is_base_of_v<OutputStream, T>;
 
 	template <typename T>
-	concept InputOutputStreamConcept = InputStreamConcept<T>&& OutputStreamConcept<T>;
+	concept InputOutputStreamConcept = InputStreamConcept<T> && OutputStreamConcept<T>;
 
 	template <typename T>
 	concept SeekableStreamConcept = std::is_base_of_v<SeekableStream<Stream>, T>;

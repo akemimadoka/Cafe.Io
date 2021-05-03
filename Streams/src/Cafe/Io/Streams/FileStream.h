@@ -195,7 +195,8 @@ namespace Cafe::Io
 			{
 #	if defined(_WIN32)
 				LARGE_INTEGER pos;
-				if (!SetFilePointerEx(m_FileHandle, {}, &pos, static_cast<DWORD>(SeekOrigin::Current)))
+				if (!SetFilePointerEx(m_FileHandle, {}, &pos,
+				                      static_cast<DWORD>(SeekOrigin::Current)))
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot fetch current position."));
 				}
@@ -283,10 +284,11 @@ namespace Cafe::Io
 				const DWORD beginHighPart = 0;
 #			endif
 
-				const auto mappedAddress = MapViewOfFile(fileMapping,
-				                                         (IsInputStream ? FILE_MAP_READ : FILE_MAP_WRITE) |
-				                                             (executable ? FILE_MAP_EXECUTE : 0),
-				                                         beginHighPart, beginLowPart, size);
+				const auto mappedAddress =
+				    MapViewOfFile(fileMapping,
+				                  (IsInputStream ? FILE_MAP_READ : FILE_MAP_WRITE) |
+				                      (executable ? FILE_MAP_EXECUTE : 0),
+				                  beginHighPart, beginLowPart, size);
 
 				if (!mappedAddress)
 				{
@@ -297,15 +299,15 @@ namespace Cafe::Io
 				m_MappedFile = mappedAddress;
 
 				return MapStream{ std::span(
-					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
-					      mappedAddress),
-					  size ? size : this->GetTotalSize()) };
+					static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
+					    mappedAddress),
+					size ? size : this->GetTotalSize()) };
 #		else
 				const auto mappedSize = size ? size : this->GetTotalSize();
-				const auto mappedFile =
-				    mmap64(nullptr, mappedSize,
-				           PROT_READ | (IsInputStream ? 0 : PROT_WRITE) | (executable ? PROT_EXEC : 0),
-				           MAP_SHARED, m_FileHandle, begin);
+				const auto mappedFile = mmap64(nullptr, mappedSize,
+				                               PROT_READ | (IsInputStream ? 0 : PROT_WRITE) |
+				                                   (executable ? PROT_EXEC : 0),
+				                               MAP_SHARED, m_FileHandle, begin);
 				if (mappedFile == MAP_FAILED)
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("mmap64 failed."));
@@ -315,8 +317,9 @@ namespace Cafe::Io
 				m_FileViewSize = mappedSize;
 
 				return MapStream{ std::span(
-					  static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(mappedFile),
-					  mappedSize) };
+					static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
+					    mappedFile),
+					mappedSize) };
 #		endif
 			}
 

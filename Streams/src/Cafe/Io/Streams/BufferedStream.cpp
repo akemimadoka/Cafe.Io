@@ -173,8 +173,9 @@ void BufferedInputStream::FlushBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(std::span(
-		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
+		const auto readSize = m_UnderlyingStream->ReadAvailableBytes(
+		    std::span(&m_Buffer[keep ? m_CurrentPosition : 0],
+		              std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
 	else
@@ -195,8 +196,9 @@ void BufferedInputStream::FillBuffer(bool keep, std::size_t needSize)
 	}
 	if (m_MaxBufferSize != keepSize && needSize)
 	{
-		const auto readSize = m_UnderlyingStream->ReadBytes(std::span(
-		    &m_Buffer[keep ? m_CurrentPosition : 0], std::min(m_MaxBufferSize - keepSize, needSize)));
+		const auto readSize = m_UnderlyingStream->ReadBytes(
+		    std::span(&m_Buffer[keep ? m_CurrentPosition : 0],
+		              std::min(m_MaxBufferSize - keepSize, needSize)));
 		m_ReadSize = keepSize + readSize;
 	}
 	else
@@ -245,7 +247,7 @@ BufferedOutputStream::BufferedOutputStream(OutputStream* stream, std::size_t buf
 
 BufferedOutputStream::BufferedOutputStream(BufferedOutputStream&& other) noexcept
     : m_UnderlyingStream{ std::exchange(other.m_UnderlyingStream, nullptr) }, m_Buffer{ std::move(
-	                                                                                other.m_Buffer) },
+	                                                                              other.m_Buffer) },
       m_BufferSize{ other.m_BufferSize }, m_CurrentPosition{ other.m_CurrentPosition }
 {
 }

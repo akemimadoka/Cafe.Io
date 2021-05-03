@@ -9,7 +9,7 @@ using namespace Io;
 namespace
 {
 	constexpr std::uint8_t Data[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-		                                0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+		                              0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 }
 
 TEST_CASE("Cafe.Io.StreamHelpers", "[Io][StreamHelpers]")
@@ -33,8 +33,8 @@ TEST_CASE("Cafe.Io.StreamHelpers", "[Io][StreamHelpers]")
 
 		const auto u64 = reader.Read<std::uint64_t>();
 		REQUIRE(u64);
-		REQUIRE(*u64 ==
-		        (std::endian::native == std::endian::little ? 0x0f0e0d0c0b0a0908 : 0x08090a0b0c0d0e0f));
+		REQUIRE(*u64 == (std::endian::native == std::endian::little ? 0x0f0e0d0c0b0a0908
+		                                                            : 0x08090a0b0c0d0e0f));
 
 		REQUIRE(stream.GetPosition() == std::size(Data));
 
@@ -61,7 +61,7 @@ TEST_CASE("Cafe.Io.StreamHelpers", "[Io][StreamHelpers]")
 		else
 		{
 			constexpr std::uint8_t BigData[] = { 0x01, 0x03, 0x02, 0x07, 0x06, 0x05, 0x04, 0x0f,
-				                                   0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08 };
+				                                 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08 };
 			REQUIRE(std::memcmp(buffer, BigData, 15) == 0);
 		}
 
