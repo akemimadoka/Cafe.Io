@@ -127,7 +127,6 @@ namespace Cafe::Io
 		virtual ~SeekableStream();
 	};
 
-#if CAFE_IO_STREAMS_USE_CONCEPTS
 	template <typename T>
 	concept InputStreamConcept = std::is_base_of_v<InputStream, T>;
 
@@ -139,5 +138,4 @@ namespace Cafe::Io
 
 	template <typename T>
 	concept SeekableStreamConcept = std::is_base_of_v<SeekableStream<Stream>, T>;
-#endif
 } // namespace Cafe::Io

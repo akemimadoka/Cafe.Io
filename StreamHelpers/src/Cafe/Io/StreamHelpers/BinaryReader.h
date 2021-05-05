@@ -13,12 +13,7 @@ namespace Cafe::Io
 	static_assert(std::endian::native == std::endian::little ||
 	              std::endian::native == std::endian::big);
 
-#if CAFE_IO_STREAMS_USE_CONCEPTS
 	template <InputStreamConcept InputStreamType = InputStream>
-#else
-	template <typename InputStreamType = InputStream,
-	          std::enable_if_t<std::is_base_of_v<InputStream, InputStreamType>, int> = 0>
-#endif
 	class BinaryReader
 	{
 	public:

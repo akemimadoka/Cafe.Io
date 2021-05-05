@@ -1,4 +1,3 @@
-set(CAFE_IO_STREAMS_USE_CONCEPTS ON CACHE BOOL "Use concepts in Cafe.Io.Streams")
 set(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM ON CACHE BOOL "Include FileStream in Cafe.Io.Streams")
 set(CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING ON CACHE BOOL "Enable file mapping in FileStreams")
 
@@ -24,30 +23,15 @@ endif()
 add_library(Cafe.Io.Streams ${SOURCE_FILES} ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/Cafe/Io/Streams/Config/StreamConfig.h)
 
+target_compile_features(Cafe.Io.Streams PUBLIC cxx_std_20)
+
 target_include_directories(Cafe.Io.Streams PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(Cafe.Io.Streams PUBLIC
-    Cafe.ErrorHandling)
-
-if(CAFE_IO_STREAMS_USE_CONCEPTS)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(Cafe.Io.Streams PUBLIC -fconcepts)
-    else()
-        message(FATAL "Compiler ${CMAKE_CXX_COMPILER_ID} does not support concept for now")
-    endif()
-endif()
-
-if(CAFE_IO_STREAMS_INCLUDE_FILE_STREAM)
-    if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-        target_link_libraries(Cafe.Io.Streams PUBLIC
-            Cafe.Encoding.UTF-16)
-    endif()
-    target_link_libraries(Cafe.Io.Streams PUBLIC
-        Cafe.TextUtils.Misc)
-endif()
+    CONAN_PKG::Cafe.ErrorHandling)
 
 install(TARGETS Cafe.Io.Streams
     EXPORT Io.Streams)

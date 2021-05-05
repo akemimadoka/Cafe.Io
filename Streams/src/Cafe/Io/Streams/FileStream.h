@@ -7,7 +7,6 @@
 #	include "StreamBase.h"
 #	include "MemoryStream.h"
 #	include <Cafe/Encoding/Strings.h>
-#	include <Cafe/TextUtils/Misc.h>
 #	include <filesystem>
 #	include <cassert>
 
@@ -376,12 +375,6 @@ namespace Cafe::Io
 		explicit FileInputStream(std::filesystem::path const& path);
 		explicit FileInputStream(Encoding::StringView<PathNativeCodePage> const& path);
 
-		template <Encoding::CodePage::CodePageType CodePageValue>
-		explicit FileInputStream(Encoding::StringView<CodePageValue> const& path)
-		    : FileInputStream{ TextUtils::EncodeTo<PathNativeCodePage>(path).GetView() }
-		{
-		}
-
 		/// @brief  直接以已获得的文件句柄构造
 		/// @param  fileHandle      文件句柄
 		/// @param  transferOwner   转移所有权，若为 true 则 Close() 会关闭此句柄
@@ -418,13 +411,6 @@ namespace Cafe::Io
 		                          FileOpenMode openMode = FileOpenMode::Truncate);
 		explicit FileOutputStream(Encoding::StringView<PathNativeCodePage> const& path,
 		                          FileOpenMode openMode = FileOpenMode::Truncate);
-
-		template <Encoding::CodePage::CodePageType CodePageValue>
-		explicit FileOutputStream(Encoding::StringView<CodePageValue> const& path,
-		                          FileOpenMode openMode = FileOpenMode::Truncate)
-		    : FileOutputStream{ TextUtils::EncodeTo<PathNativeCodePage>(path).GetView(), openMode }
-		{
-		}
 
 		/// @brief  直接以已获得的文件句柄构造
 		/// @param  fileHandle      文件句柄

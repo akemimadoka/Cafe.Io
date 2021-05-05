@@ -13,12 +13,7 @@ namespace Cafe::Io
 	static_assert(std::endian::native == std::endian::little ||
 	              std::endian::native == std::endian::big);
 
-#if CAFE_IO_STREAMS_USE_CONCEPTS
 	template <OutputStreamConcept OutputStreamType = OutputStream>
-#else
-	template <typename OutputStreamType = OutputStream,
-	          std::enable_if_t<std::is_base_of_v<OutputStream, OutputStreamType>, int> = 0>
-#endif
 	class BinaryWriter
 	{
 	public:
