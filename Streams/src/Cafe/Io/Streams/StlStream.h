@@ -33,7 +33,7 @@ namespace Cafe::Io
 		~StlOutputStream();
 
 		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
-		void Flush();
+		void Flush() override;
 
 		std::size_t GetPosition() const override;
 		void SeekFromBegin(std::size_t pos) override;
@@ -57,7 +57,7 @@ namespace Cafe::Io
 		std::size_t Skip(std::size_t n) override;
 
 		std::size_t WriteBytes(std::span<const std::byte> const& buffer) override;
-		void Flush();
+		void Flush() override;
 
 		std::size_t GetPosition() const override;
 		void SeekFromBegin(std::size_t pos) override;

@@ -7,7 +7,7 @@ target_include_directories(Cafe.Io.StreamHelpers INTERFACE
     $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(Cafe.Io.StreamHelpers INTERFACE
-    Cafe.Io.Streams CONAN_PKG::Cafe.Environment)
+    Cafe.Io.Streams)
 
 install(TARGETS Cafe.Io.StreamHelpers
     EXPORT Io.StreamHelpers)

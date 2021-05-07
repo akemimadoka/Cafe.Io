@@ -1,7 +1,7 @@
 #include <Cafe/Io/Streams/BufferedStream.h>
 #include <Cafe/Io/Streams/FileStream.h>
 #include <Cafe/Io/Streams/MemoryStream.h>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include <cstring>
 
 using namespace Cafe;
@@ -15,12 +15,17 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 #if CAFE_IO_STREAMS_INCLUDE_FILE_STREAM
 	SECTION("FileStreams")
 	{
-		FileOutputStream tmpFile{ u"Temp.txt"_sv };
+#	ifdef _WIN32
+		const auto fileName = u"Temp.txt"_sv;
+#	else
+		const auto fileName = u8"Temp.txt"_sv;
+#	endif
+		FileOutputStream tmpFile{ fileName };
 		const auto writtenSize = tmpFile.WriteBytes(std::as_bytes(std::span(Data)));
 		REQUIRE(writtenSize == 10);
 		tmpFile.Close();
 
-		FileInputStream tmpFile2{ u"Temp.txt"_sv };
+		FileInputStream tmpFile2{ fileName };
 		std::byte buffer[10];
 		const auto readSize = tmpFile2.ReadBytes(std::span(buffer));
 		REQUIRE(readSize == 10);

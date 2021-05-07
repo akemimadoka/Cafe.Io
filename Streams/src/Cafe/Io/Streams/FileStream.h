@@ -17,7 +17,7 @@
 #		include <memoryapi.h>
 #		include <windef.h>
 #		include <winbase.h>
-#	elif defined(__linux__)
+#	elif defined(__linux__) || defined(__APPLE__)
 #		include <Cafe/Encoding/CodePage/UTF-8.h>
 #		include <fcntl.h>
 #		include <unistd.h>
@@ -41,7 +41,7 @@ namespace Cafe::Io
 		        Encoding::CodePage::Utf16LittleEndian>::CharType*>(nativeString.data()),
 		    nativeString.size());
 	}
-#	elif defined(__linux__)
+#	elif defined(__linux__) || defined(__APPLE__)
 	constexpr Encoding::CodePage::CodePageType PathNativeCodePage = Encoding::CodePage::Utf8;
 
 	inline Encoding::StringView<Encoding::CodePage::Utf8>
@@ -61,11 +61,11 @@ namespace Cafe::Io
 	PathToNativeString(std::filesystem::path const& path)
 	{
 		const auto string = path.u8string();
-		return std::span(
+		return Encoding::String<Encoding::CodePage::Utf8>(std::span(
 		    reinterpret_cast<
 		        const Encoding::CodePage::CodePageTrait<Encoding::CodePage::Utf8>::CharType*>(
 		        string.data()),
-		    string.size());
+		    string.size()));
 	}
 #	endif
 
@@ -201,8 +201,8 @@ namespace Cafe::Io
 				}
 				return static_cast<std::size_t>(pos.QuadPart);
 #	else
-				const auto pos = lseek64(m_FileHandle, 0, static_cast<int>(SeekOrigin::Current));
-				if (pos == off64_t(-1))
+				const auto pos = lseek(m_FileHandle, 0, static_cast<int>(SeekOrigin::Current));
+				if (pos == off_t(-1))
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot set position."));
 				}
@@ -226,7 +226,7 @@ namespace Cafe::Io
 				// SEEK_SET SEEK_CUR SEEK_END 刚好对应 SeekOrigin 的值
 				const auto whence = static_cast<int>(origin);
 
-				if (lseek64(m_FileHandle, static_cast<off64_t>(diff), whence) == off64_t(-1))
+				if (lseek(m_FileHandle, static_cast<off_t>(diff), whence) == off_t(-1))
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot set position."));
 				}
@@ -303,10 +303,10 @@ namespace Cafe::Io
 					size ? size : this->GetTotalSize()) };
 #		else
 				const auto mappedSize = size ? size : this->GetTotalSize();
-				const auto mappedFile = mmap64(nullptr, mappedSize,
-				                               PROT_READ | (IsInputStream ? 0 : PROT_WRITE) |
-				                                   (executable ? PROT_EXEC : 0),
-				                               MAP_SHARED, m_FileHandle, begin);
+				const auto mappedFile = mmap(nullptr, mappedSize,
+				                             PROT_READ | (IsInputStream ? 0 : PROT_WRITE) |
+				                                 (executable ? PROT_EXEC : 0),
+				                             MAP_SHARED, m_FileHandle, begin);
 				if (mappedFile == MAP_FAILED)
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("mmap64 failed."));

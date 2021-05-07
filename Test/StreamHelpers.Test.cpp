@@ -1,7 +1,7 @@
 #include <Cafe/Io/StreamHelpers/BinaryReader.h>
 #include <Cafe/Io/StreamHelpers/BinaryWriter.h>
 #include <Cafe/Io/Streams/MemoryStream.h>
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using namespace Cafe;
 using namespace Io;
