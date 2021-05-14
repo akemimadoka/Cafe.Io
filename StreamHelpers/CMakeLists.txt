@@ -9,6 +9,8 @@ target_include_directories(Cafe.Io.StreamHelpers INTERFACE
 target_link_libraries(Cafe.Io.StreamHelpers INTERFACE
     Cafe.Io.Streams)
 
+AddCafeSharedFlags(Cafe.Io.StreamHelpers)
+
 install(TARGETS Cafe.Io.StreamHelpers
     EXPORT Io.StreamHelpers)
 

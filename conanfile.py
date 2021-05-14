@@ -27,6 +27,7 @@ class CafeIoConan(ConanFile):
     default_options = {opt[0]: opt[2] for opt in Options}
 
     requires = "Cafe.ErrorHandling/0.1"
+    python_requires = "CafeCommon/0.1"
 
     generators = "cmake"
 
@@ -54,4 +55,5 @@ class CafeIoConan(ConanFile):
             cmake.install()
 
     def package_info(self):
+        self.python_requires["CafeCommon"].module.addCafeSharedCompileOptions(self)
         self.cpp_info.libs = ["Cafe.Io.Streams"]

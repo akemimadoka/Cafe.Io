@@ -33,6 +33,8 @@ target_include_directories(Cafe.Io.Streams PUBLIC
 target_link_libraries(Cafe.Io.Streams PUBLIC
     CONAN_PKG::Cafe.ErrorHandling)
 
+AddCafeSharedFlags(Cafe.Io.Streams)
+
 install(TARGETS Cafe.Io.Streams
     EXPORT Io.Streams)
 
