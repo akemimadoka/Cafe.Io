@@ -12,11 +12,9 @@
 
 #	if defined(_WIN32)
 #		include <Cafe/Encoding/CodePage/UTF-16.h>
-#		include <fileapi.h>
-#		include <handleapi.h>
-#		include <memoryapi.h>
-#		include <windef.h>
-#		include <winbase.h>
+#		define WIN32_LEAN_AND_MEAN
+#		define NOMINMAX
+#		include <Windows.h>
 #	elif defined(__linux__) || defined(__APPLE__)
 #		include <Cafe/Encoding/CodePage/UTF-8.h>
 #		include <fcntl.h>
