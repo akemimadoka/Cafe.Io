@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #ifdef __MSC_VER
-#	include <cstdlib> // 引入 _byteswap_ushort _byteswap_ulong _byteswap_uint64
+#include <cstdlib> // 引入 _byteswap_ushort _byteswap_ulong _byteswap_uint64
 #endif
 
 namespace Cafe::Io
@@ -68,11 +68,11 @@ namespace Cafe::Io
 					{
 						return false;
 					}
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					const auto swappedResult = __builtin_bswap16(readValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					const auto swappedResult = _byteswap_ushort(readValue);
-#	endif
+#endif
 					std::memcpy(std::addressof(value), &swappedResult, 2);
 				}
 				else if constexpr (sizeof(T) == 4)
@@ -82,11 +82,11 @@ namespace Cafe::Io
 					{
 						return false;
 					}
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					const auto swappedResult = __builtin_bswap32(readValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					const auto swappedResult = _byteswap_ulong(readValue);
-#	endif
+#endif
 					std::memcpy(std::addressof(value), &swappedResult, 4);
 				}
 				else if constexpr (sizeof(T) == 8)
@@ -96,11 +96,11 @@ namespace Cafe::Io
 					{
 						return false;
 					}
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					const auto swappedResult = __builtin_bswap64(readValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					const auto swappedResult = _byteswap_uint64(readValue);
-#	endif
+#endif
 					std::memcpy(std::addressof(value), &swappedResult, 8);
 				}
 #endif

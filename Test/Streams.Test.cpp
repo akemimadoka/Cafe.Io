@@ -15,11 +15,11 @@ TEST_CASE("Cafe.Io.Streams", "[Io][Streams]")
 #if CAFE_IO_STREAMS_INCLUDE_FILE_STREAM
 	SECTION("FileStreams")
 	{
-#	ifdef _WIN32
+#ifdef _WIN32
 		const auto fileName = u"Temp.txt"_sv;
-#	else
+#else
 		const auto fileName = u8"Temp.txt"_sv;
-#	endif
+#endif
 		FileOutputStream tmpFile{ fileName };
 		const auto writtenSize = tmpFile.WriteBytes(std::as_bytes(std::span(Data)));
 		REQUIRE(writtenSize == 10);

@@ -4,29 +4,29 @@
 
 #if CAFE_IO_STREAMS_INCLUDE_FILE_STREAM
 
-#	include "StreamBase.h"
-#	include "MemoryStream.h"
-#	include <Cafe/Encoding/Strings.h>
-#	include <filesystem>
-#	include <cassert>
+#include "StreamBase.h"
+#include "MemoryStream.h"
+#include <Cafe/Encoding/Strings.h>
+#include <filesystem>
+#include <cassert>
 
-#	if defined(_WIN32)
-#		include <Cafe/Encoding/CodePage/UTF-16.h>
-#		define WIN32_LEAN_AND_MEAN
-#		define NOMINMAX
-#		include <Windows.h>
-#	elif defined(__linux__) || defined(__APPLE__)
-#		include <Cafe/Encoding/CodePage/UTF-8.h>
-#		include <fcntl.h>
-#		include <unistd.h>
-#		if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
-#			include <sys/mman.h>
-#		endif
-#	endif
+#if defined(_WIN32)
+#include <Cafe/Encoding/CodePage/UTF-16.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#elif defined(__linux__) || defined(__APPLE__)
+#include <Cafe/Encoding/CodePage/UTF-8.h>
+#include <fcntl.h>
+#include <unistd.h>
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#include <sys/mman.h>
+#endif
+#endif
 
 namespace Cafe::Io
 {
-#	if defined(_WIN32)
+#if defined(_WIN32)
 	constexpr Encoding::CodePage::CodePageType PathNativeCodePage =
 	    Encoding::CodePage::Utf16LittleEndian;
 
@@ -39,7 +39,7 @@ namespace Cafe::Io
 		        Encoding::CodePage::Utf16LittleEndian>::CharType*>(nativeString.data()),
 		    nativeString.size());
 	}
-#	elif defined(__linux__) || defined(__APPLE__)
+#elif defined(__linux__) || defined(__APPLE__)
 	constexpr Encoding::CodePage::CodePageType PathNativeCodePage = Encoding::CodePage::Utf8;
 
 	inline Encoding::StringView<Encoding::CodePage::Utf8>
@@ -52,7 +52,7 @@ namespace Cafe::Io
 		        nativeString.data()),
 		    nativeString.size());
 	}
-#	else
+#else
 	constexpr Encoding::CodePage::CodePageType PathNativeCodePage = Encoding::CodePage::Utf8;
 
 	inline Encoding::String<Encoding::CodePage::Utf8>
@@ -65,7 +65,7 @@ namespace Cafe::Io
 		        string.data()),
 		    string.size()));
 	}
-#	endif
+#endif
 
 	CAFE_DEFINE_GENERAL_EXCEPTION(FileIoException, IoException);
 
@@ -79,38 +79,33 @@ namespace Cafe::Io
 
 		public:
 			using NativeHandle =
-#	if defined(_WIN32)
+#if defined(_WIN32)
 			    HANDLE
-#	else
+#else
 			    int
-#	endif
+#endif
 			    ;
 
 			// INVALID_HANDLE_VALUE 有强制转换，不能是 constexpr 的
 			static inline const NativeHandle InvalidHandleValue =
-#	if defined(_WIN32)
+#if defined(_WIN32)
 			    INVALID_HANDLE_VALUE
-#	else
+#else
 			    -1
-#	endif
+#endif
 			    ;
 
 			explicit FileStreamCommonPart(NativeHandle nativeHandle = InvalidHandleValue) noexcept
-			    : m_FileHandle{ nativeHandle }, m_ShouldNotDestroy
-			{
-				false
-			}
-#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
-#		if defined(_WIN32)
-			, m_FileMapping{}, m_MappedFile
-			{
-			}
-#		else
-			, m_FileView{}, m_FileViewSize
-			{
-			}
-#		endif
-#	endif
+			    : m_FileHandle{ nativeHandle }, m_ShouldNotDestroy{ false }
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#if defined(_WIN32)
+			      ,
+			      m_FileMapping{}, m_MappedFile{}
+#else
+			      ,
+			      m_FileView{}, m_FileViewSize{}
+#endif
+#endif
 			{
 			}
 
@@ -118,23 +113,20 @@ namespace Cafe::Io
 
 			FileStreamCommonPart(FileStreamCommonPart&& other) noexcept
 			    : m_FileHandle{ std::exchange(other.m_FileHandle, InvalidHandleValue) },
-			      m_ShouldNotDestroy
-			{
-				other.m_ShouldNotDestroy
-			}
-#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
-#		if defined(_WIN32)
-			, m_FileMapping{ std::exchange(other.m_FileMapping, nullptr) }, m_MappedFile
-			{
-				std::exchange(other.m_MappedFile, nullptr)
-			}
-#		else
-			, m_FileView{ std::exchange(other.m_FileView, nullptr) }, m_FileViewSize
-			{
-				std::exchange(other.m_FileViewSize, 0)
-			}
-#		endif
-#	endif
+			      m_ShouldNotDestroy{ other.m_ShouldNotDestroy }
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#if defined(_WIN32)
+			      ,
+			      m_FileMapping{ std::exchange(other.m_FileMapping, nullptr) }, m_MappedFile{
+				      std::exchange(other.m_MappedFile, nullptr)
+			      }
+#else
+			      ,
+			      m_FileView{ std::exchange(other.m_FileView, nullptr) }, m_FileViewSize{
+				      std::exchange(other.m_FileViewSize, 0)
+			      }
+#endif
+#endif
 			{
 			}
 
@@ -153,15 +145,15 @@ namespace Cafe::Io
 					Close();
 					m_FileHandle = std::exchange(other.m_FileHandle, InvalidHandleValue);
 					m_ShouldNotDestroy = other.m_ShouldNotDestroy;
-#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
-#		if defined(_WIN32)
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#if defined(_WIN32)
 					m_FileMapping = std::exchange(other.m_FileMapping, nullptr);
 					m_MappedFile = std::exchange(other.m_MappedFile, nullptr);
-#		else
+#else
 					m_FileView = std::exchange(other.m_FileView, nullptr);
 					m_FileViewSize = std::exchange(other.m_FileViewSize, 0);
-#		endif
-#	endif
+#endif
+#endif
 				}
 
 				return *this;
@@ -169,16 +161,16 @@ namespace Cafe::Io
 
 			void Close() override
 			{
-#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
 				Unmap();
-#	endif
+#endif
 				if (!m_ShouldNotDestroy && m_FileHandle != InvalidHandleValue)
 				{
-#	if defined(_WIN32)
+#if defined(_WIN32)
 					CloseHandle(m_FileHandle);
-#	else
+#else
 					close(m_FileHandle);
-#	endif
+#endif
 					m_FileHandle = InvalidHandleValue;
 				}
 			}
@@ -190,7 +182,7 @@ namespace Cafe::Io
 
 			std::size_t GetPosition() const override
 			{
-#	if defined(_WIN32)
+#if defined(_WIN32)
 				LARGE_INTEGER pos;
 				if (!SetFilePointerEx(m_FileHandle, {}, &pos,
 				                      static_cast<DWORD>(SeekOrigin::Current)))
@@ -198,19 +190,19 @@ namespace Cafe::Io
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot fetch current position."));
 				}
 				return static_cast<std::size_t>(pos.QuadPart);
-#	else
+#else
 				const auto pos = lseek(m_FileHandle, 0, static_cast<int>(SeekOrigin::Current));
 				if (pos == off_t(-1))
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot set position."));
 				}
 				return static_cast<std::size_t>(pos);
-#	endif
+#endif
 			}
 
 			void Seek(SeekOrigin origin, std::ptrdiff_t diff) override
 			{
-#	if defined(_WIN32)
+#if defined(_WIN32)
 				// 值刚好对应，不想为了几个宏引入太多依赖，因此不包含 Winbase.h
 				const auto moveMethod = static_cast<DWORD>(origin);
 
@@ -220,7 +212,7 @@ namespace Cafe::Io
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot set position."));
 				}
-#	else
+#else
 				// SEEK_SET SEEK_CUR SEEK_END 刚好对应 SeekOrigin 的值
 				const auto whence = static_cast<int>(origin);
 
@@ -228,10 +220,10 @@ namespace Cafe::Io
 				{
 					CAFE_THROW(FileIoException, CAFE_UTF8_SV("Cannot set position."));
 				}
-#	endif
+#endif
 			}
 
-#	if defined(_WIN32)
+#if defined(_WIN32)
 			std::size_t GetTotalSize() override
 			{
 				LARGE_INTEGER size;
@@ -242,22 +234,22 @@ namespace Cafe::Io
 
 				return static_cast<std::size_t>(size.QuadPart);
 			}
-#	endif
+#endif
 
-#	if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
+#if CAFE_IO_STREAMS_FILE_STREAM_ENABLE_FILE_MAPPING
 			std::conditional_t<IsInputStream, ExternalMemoryInputStream, ExternalMemoryOutputStream>
 			MapToMemory(std::size_t begin = 0, std::size_t size = 0, bool executable = false)
 			{
 				using MapStream = std::conditional_t<IsInputStream, ExternalMemoryInputStream,
 				                                     ExternalMemoryOutputStream>;
-#		if defined(_WIN32)
-#			if defined(_WIN64)
+#if defined(_WIN32)
+#if defined(_WIN64)
 				const DWORD sizeLowPart = size & 0xFFFFFFFF;
 				const DWORD sizeHighPart = (size >> 32) & 0xFFFFFFFF;
-#			else
+#else
 				const DWORD sizeLowPart = size;
 				const DWORD sizeHighPart = 0;
-#			endif
+#endif
 				const auto fileMapping = CreateFileMappingA(
 				    m_FileHandle, nullptr,
 				    IsInputStream ? (executable ? PAGE_EXECUTE_READ : PAGE_READONLY)
@@ -273,13 +265,13 @@ namespace Cafe::Io
 					CloseHandle(fileMapping);
 				};
 
-#			if defined(_WIN64)
+#if defined(_WIN64)
 				const DWORD beginLowPart = begin & 0xFFFFFFFF;
 				const DWORD beginHighPart = (begin >> 32) & 0xFFFFFFFF;
-#			else
+#else
 				const DWORD beginLowPart = begin;
 				const DWORD beginHighPart = 0;
-#			endif
+#endif
 
 				const auto mappedAddress =
 				    MapViewOfFile(fileMapping,
@@ -299,7 +291,7 @@ namespace Cafe::Io
 					static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
 					    mappedAddress),
 					size ? size : this->GetTotalSize()) };
-#		else
+#else
 				const auto mappedSize = size ? size : this->GetTotalSize();
 				const auto mappedFile = mmap(nullptr, mappedSize,
 				                             PROT_READ | (IsInputStream ? 0 : PROT_WRITE) |
@@ -317,12 +309,12 @@ namespace Cafe::Io
 					static_cast<std::conditional_t<IsInputStream, const std::byte, std::byte>*>(
 					    mappedFile),
 					mappedSize) };
-#		endif
+#endif
 			}
 
 			void Unmap() noexcept
 			{
-#		if defined(_WIN32)
+#if defined(_WIN32)
 				assert(!m_MappedFile == !m_FileMapping);
 				if (m_MappedFile)
 				{
@@ -332,7 +324,7 @@ namespace Cafe::Io
 					m_FileMapping = nullptr;
 					m_MappedFile = nullptr;
 				}
-#		else
+#else
 				assert(!m_FileView == !m_FileViewSize);
 				if (m_FileView)
 				{
@@ -341,7 +333,7 @@ namespace Cafe::Io
 					m_FileView = nullptr;
 					m_FileViewSize = 0;
 				}
-#		endif
+#endif
 			}
 
 		protected:
@@ -349,14 +341,14 @@ namespace Cafe::Io
 			bool m_ShouldNotDestroy;
 
 		private:
-#		if defined(_WIN32)
+#if defined(_WIN32)
 			HANDLE m_FileMapping;
 			void* m_MappedFile;
-#		else
+#else
 			void* m_FileView;
 			std::size_t m_FileViewSize;
-#		endif
-#	endif
+#endif
+#endif
 		};
 
 		struct SpecifyNativeHandleTag

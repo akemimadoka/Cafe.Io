@@ -5,7 +5,7 @@
 #include <type_traits>
 
 #ifdef __MSC_VER
-#	include <cstdlib> // 引入 _byteswap_ushort _byteswap_ulong _byteswap_uint64
+#include <cstdlib> // 引入 _byteswap_ushort _byteswap_ulong _byteswap_uint64
 #endif
 
 namespace Cafe::Io
@@ -54,33 +54,33 @@ namespace Cafe::Io
 				{
 					std::uint16_t writeValue;
 					std::memcpy(&writeValue, std::addressof(value), 2);
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					writeValue = __builtin_bswap16(writeValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					writeValue = _byteswap_ushort(writeValue);
-#	endif
+#endif
 					return m_Stream->WriteBytes(std::as_bytes(std::span(&writeValue, 1))) == 2;
 				}
 				else if constexpr (sizeof(T) == 4)
 				{
 					std::uint32_t writeValue;
 					std::memcpy(&writeValue, std::addressof(value), 4);
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					writeValue = __builtin_bswap32(writeValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					writeValue = _byteswap_ulong(writeValue);
-#	endif
+#endif
 					return m_Stream->WriteBytes(std::as_bytes(std::span(&writeValue, 1))) == 4;
 				}
 				else if constexpr (sizeof(T) == 8)
 				{
 					std::uint64_t writeValue;
 					std::memcpy(&writeValue, std::addressof(value), 8);
-#	ifdef __GNUC__
+#ifdef __GNUC__
 					writeValue = __builtin_bswap64(writeValue);
-#	else // _MSC_VER
+#else // _MSC_VER
 					writeValue = _byteswap_uint64(writeValue);
-#	endif
+#endif
 					return m_Stream->WriteBytes(std::as_bytes(std::span(&writeValue, 1))) == 8;
 				}
 #endif
