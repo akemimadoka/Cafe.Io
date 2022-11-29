@@ -23,4 +23,4 @@ if(CAFE_IO_INCLUDE_STREAM_HELPERS)
         Cafe.Io.StreamHelpers)
 endif()
 
-ParseAndAddCatchTests(Cafe.Io.Test)
+catch_discover_tests(Cafe.Io.Test)
